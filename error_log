@@ -1,0 +1,1 @@
+[01-Oct-2024 22:05:30 UTC] PHP Fatal error:  Trait "Laravel\Sanctum\HasApiTokens" not found in /home/redil2024/public_html/app/Models/User.php on line 23
