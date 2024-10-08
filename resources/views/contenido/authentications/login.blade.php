@@ -10,22 +10,24 @@ $configData = Helper::appClasses();
 
 @section('vendor-style')
 <!-- Vendor -->
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/@form-validation/umd/styles/index.min.css')}}" />
+@vite(['resources/assets/vendor/libs/@form-validation/umd/styles/index.min.css'])
 @endsection
 
 @section('page-style')
 <!-- Page -->
-<link rel="stylesheet" href="{{asset('assets/vendor/css/pages/page-auth.css')}}">
+@vite(['resources/assets/vendor/scss/pages/page-auth.scss'])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/@form-validation/umd/bundle/popular.min.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js',
+'resources/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js',
+'resources/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js',
+])
 @endsection
 
 @section('page-script')
-<script src="{{asset('assets/js/pages-auth.js')}}"></script>
+@vite(['resources/assets/js/pages-auth.js'])
 @endsection
 
 @section('content')
@@ -85,7 +87,7 @@ $configData = Helper::appClasses();
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="remember-me">
               <label class="form-check-label" for="remember-me">
-                Remember Me
+                Recordarme
               </label>
             </div>
           </div>
@@ -104,17 +106,23 @@ $configData = Helper::appClasses();
         </p>
 
         <div class="divider my-4">
-          <div class="divider-text">Ingresar con</div>
+          <div class="divider-text">Siguenos en redes</div>
         </div>
 
         <div class="d-flex justify-content-center">
+
           <a href="javascript:;" class="btn btn-icon btn-label-facebook me-3">
             <i class="tf-icons fa-brands fa-facebook-f fs-5"></i>
           </a>
 
-          <a href="javascript:;" class="btn btn-icon btn-label-google-plus">
-            <i class="tf-icons fa-brands fa-google fs-5"></i>
+          <a href="javascript:;" class="btn btn-icon btn-label-instagram me-3">
+            <i class="tf-icons fa-brands fa-instagram fs-5"></i>
           </a>
+
+          <a href="javascript:;" class="btn btn-icon btn-label-youtube me-3">
+            <i class="tf-icons fa-brands fa-youtube fs-5"></i>
+          </a>
+
         </div>
       </div>
     </div>

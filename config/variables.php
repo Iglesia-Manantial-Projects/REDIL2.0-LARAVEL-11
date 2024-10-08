@@ -1,9 +1,9 @@
 <?php
 // Variables
 return [
-  "creatorName" => "Pixinvent",
-  "creatorUrl" => "https://pixinvent.com",
-  "templateName" => "Vuexy",
+  "creatorName" => "IDEARRIBA COLOMBIA",
+  "creatorUrl" => "https://redil.co",
+  "templateName" => "LARAVEL",
   "templateSuffix" => "Bootstrap Admin Template",
   "templateVersion" => "2.0.0",
   "templateFree" => false,
@@ -25,5 +25,6 @@ return [
   "twitterUrl" => "https://twitter.com/pixinvents",
   "githubUrl" => "https://github.com/pixinvent",
   "dribbbleUrl" => "https://dribbble.com/pixinvent",
-  "instagramUrl" => "https://www.instagram.com/pixinvents/"
+  "instagramUrl" => "https://www.instagram.com/pixinvents/",
+  "biblia_key" => env('BIBLIA_KEY')
 ];
