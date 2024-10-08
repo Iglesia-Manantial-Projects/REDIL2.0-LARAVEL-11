@@ -41,16 +41,7 @@ $navbarDetached = ($navbarDetached ?? '');
       <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
 
         @if(!isset($menuHorizontal))
-        <!-- Search -->
-        <div class="navbar-nav align-items-center">
-          <div class="nav-item navbar-search-wrapper mb-0">
-            <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">
-              <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>
-              <span class="d-none d-md-inline-block text-muted fw-normal">Search (Ctrl+/)</span>
-            </a>
-          </div>
-        </div>
-        <!-- /Search -->
+
         @endif
 
        <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -65,7 +56,7 @@ $navbarDetached = ($navbarDetached ?? '');
           @endif
 
           <!-- Language -->
-          <li class="nav-item dropdown-language dropdown">
+          <li class=" d-none nav-item dropdown-language dropdown">
             <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
               <i class='ti ti-language rounded-circle ti-md'></i>
             </a>
@@ -122,7 +113,7 @@ $navbarDetached = ($navbarDetached ?? '');
           @endif
 
           <!-- Quick links  -->
-          <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
+          <li class="d-none nav-item dropdown-shortcuts navbar-dropdown dropdown">
             <a class="nav-link btn btn-text-secondary btn-icon rounded-pill btn-icon dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
               <i class='ti ti-layout-grid-add ti-md'></i>
             </a>

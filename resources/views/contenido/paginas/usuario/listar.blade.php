@@ -8,159 +8,25 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/css/pages/page-profile.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
+@vite([
+'resources/assets/vendor/scss/pages/page-profile.scss',
+'resources/assets/vendor/libs/select2/select2.scss',
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+])
 @endsection
 
 @section('page-script')
 
-<script>
-  $(document).ready(function() {
-    $('.select2BusquedaAvanzada').select2({
-      dropdownParent: $('#modalBusquedaAvanzada')
-    });
-  });
-
-  // Eso arragle un error en los select2 con el scroll cuando esta dentro de un modal
-  $('#modalBusquedaAvanzada').on('scroll', function(event) {
-    $(this).find(".select2BusquedaAvanzada").each(function() {
-      $(this).select2({
-        dropdownParent: $(this).parent()
-      });
-    });
-  });
-
-  $(document).ready(function() {
-    $('.select2GeneradorExcel').select2({
-      dropdownParent: $('#modalGeneradorExcel')
-    });
-  });
-
-  // Eso arragle un error en los select2 con el scroll cuando esta dentro de un modal
-  $('#modalGeneradorExcel').on('scroll', function(event) {
-    $(this).find(".select2GeneradorExcel").each(function() {
-      $(this).select2({
-        dropdownParent: $(this).parent()
-      });
-    });
-  });
-
-  $("#filtroFechasPasosCrecimiento1").flatpickr({
-    mode: "range",
-    dateFormat: "Y-m-d",
-    defaultDate: ["{{ $parametrosBusqueda->filtroFechaIniPaso1 ? $parametrosBusqueda->filtroFechaIniPaso1 : ''}}", "{{ $parametrosBusqueda->filtroFechaFinPaso1 ? $parametrosBusqueda->filtroFechaFinPaso1 : ''}}"],
-    locale: {
-      firstDayOfWeek: 1,
-      weekdays: {
-        shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-      },
-      months: {
-        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
-        longhand: ['Enero', 'Febreo', 'Мarzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-      },
-    },
-    onChange: function(dates) {
-      if (dates.length == 2) {
-        var _this = this;
-        var dateArr = dates.map(function(date) {
-          return _this.formatDate(date, 'Y-m-d');
-        });
-        $('#filtroFechaIniPaso1').val(dateArr[0]);
-        $('#filtroFechaFinPaso1').val(dateArr[1]);
-        // interact with selected dates here
-      }
-    },
-    onReady: function(dateObj, dateStr, instance) {
-      var $cal = $(instance.calendarContainer);
-      if ($cal.find('.flatpickr-clear').length < 1) {
-        $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
-        $cal.find('.flatpickr-clear').on('click', function() {
-          instance.clear();
-          $('#filtroFechaIniPaso1').val('');
-          $('#filtroFechaFinPaso1').val('');
-          instance.close();
-        });
-      }
-    }
-  });
-
-  $("#filtroFechasPasosCrecimiento2").flatpickr({
-    mode: "range",
-    dateFormat: "Y-m-d",
-    defaultDate: ["{{ $parametrosBusqueda->filtroFechaIniPaso2 ? $parametrosBusqueda->filtroFechaIniPaso2 : ''}}", "{{ $parametrosBusqueda->filtroFechaFinPaso2 ? $parametrosBusqueda->filtroFechaFinPaso2 : ''}}"],
-    locale: {
-      firstDayOfWeek: 1,
-      weekdays: {
-        shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-      },
-      months: {
-        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
-        longhand: ['Enero', 'Febreo', 'Мarzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-      },
-    },
-    onChange: function(dates) {
-      if (dates.length == 2) {
-        var _this = this;
-        var dateArr = dates.map(function(date) {
-          return _this.formatDate(date, 'Y-m-d');
-        });
-        $('#filtroFechaIniPaso2').val(dateArr[0]);
-        $('#filtroFechaFinPaso2').val(dateArr[1]);
-        // interact with selected dates here
-      }
-    },
-    onReady: function(dateObj, dateStr, instance) {
-      var $cal = $(instance.calendarContainer);
-      if ($cal.find('.flatpickr-clear').length < 1) {
-        $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
-        $cal.find('.flatpickr-clear').on('click', function() {
-          instance.clear();
-          $('#filtroFechaIniPaso2').val('');
-          $('#filtroFechaFinPaso2').val('');
-          instance.close();
-        });
-      }
-    }
-  });
-
-  $(".clearAllItems").click(function() {
-    value = $(this).data('select');
-    $('#' + value).val(null).trigger('change');
-  });
-
-  $(".selectAllItems").click(function() {
-    value = $(this).data('select');
-    $("#" + value + " > option").prop("selected", true);
-    $("#" + value).trigger("change");
-  });
-
-  function darBajaAlta(usuarioId, tipo)
-  {
-    Livewire.dispatch('abrirModalBajaAlta', { usuarioId: usuarioId, tipo: tipo });
-  }
-
-  function comprobarSiTieneRegistros(usuarioId)
-  {
-    Livewire.dispatch('comprobarSiTieneRegistros', { usuarioId: usuarioId });
-  }
-
-  function eliminacionForzada(usuarioId)
-  {
-    Livewire.dispatch('confirmarEliminacion', { usuarioId: usuarioId });
-  }
-
-
-</script>
+@vite(['resources/assets/js/contenido/usuarios/listar.js'])
 
 @endsection
 
@@ -261,7 +127,7 @@ $configData = Helper::appClasses();
     <div class="row g-4 mt-1">
       @foreach($personas as $persona)
       <div class="col-xl-4 col-lg-6 col-md-6">
-        <div class="card border rounded">
+        <div style="min-height:420px" class="card border rounded">
           <div class="card-body text-center">
             <div class="dropdown btn-pinned border rounded p-1">
               <button type="button" class="btn dropdown-toggle hide-arrow p-0" data-bs-toggle="dropdown" aria-expanded="false"><i class="ti ti-dots-vertical text-muted"></i></button>

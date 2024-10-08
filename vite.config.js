@@ -14,8 +14,11 @@ function GetFilesArray(query) {
 /**
  * Js Files
  */
+
 // Page JS Files
 const pageJsFiles = GetFilesArray('resources/assets/js/*.js');
+
+const pageJsFilesCustom = GetFilesArray('resources/assets/js/**/*.js');
 
 // Processing Vendor JS Files
 const vendorJsFiles = GetFilesArray('resources/assets/vendor/js/*.js');
@@ -58,6 +61,7 @@ export default defineConfig({
         'resources/css/app.css',
         'resources/assets/css/demo.css',
         'resources/js/app.js',
+        ...pageJsFilesCustom,
         ...pageJsFiles,
         ...vendorJsFiles,
         ...LibsJsFiles,
