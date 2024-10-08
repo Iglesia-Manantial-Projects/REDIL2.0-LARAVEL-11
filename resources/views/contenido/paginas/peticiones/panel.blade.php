@@ -13,6 +13,8 @@ $configData = Helper::appClasses();
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
 
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/apex-charts/apex-charts.css')}}" />
+<link rel="stylesheet" href="{{asset('assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css')}}" />
+
 @endsection
 
 @section('vendor-script')
@@ -20,51 +22,114 @@ $configData = Helper::appClasses();
 <script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
 <script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
 <script src="{{asset('assets/vendor/libs/apex-charts/apexcharts.js')}}"></script>
+<script src="{{asset('assets/vendor/libs/moment/moment.js')}}"></script>
+
+<script src="{{asset('assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js')}}"></script>
 
 @endsection
 
 @section('page-script')
 <script src="{{asset('assets/js/cards-actions.js')}}"></script>
-<script>
-   $("#filtroFechas").flatpickr({
-    mode: "range",
-    dateFormat: "Y-m-d",
-    defaultDate: ["{{ $filtroFechaIni }}", "{{ $filtroFechaFin }}"],
-    locale: {
-      firstDayOfWeek: 1,
-      weekdays: {
-        shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+
+<script type="text/javascript">
+$(function() {
+  //esta bandera impide que entre en un bucle cuando se ejecuta la funcion cb(start, end)
+  band=0;
+  moment.locale('es');
+
+  function cb(start, end) {
+
+    $('#filtroFechaIni').val(start.format('YYYY-MM-DD'));
+    $('#filtroFechaFin').val(end.format('YYYY-MM-DD'));
+
+    $('#filtroFechas span').html(start.format('YYYY-MM-DD') + ' hasta ' + end.format('YYYY-MM-DD'));
+
+    if(band==1)
+    $("#filtro").submit();
+    band=1;
+  }
+
+  //comprobamos si existe la fecha incio y fecha fin y creamos las fechas con el formato aceptado
+  @if(isset($filtroFechaIni))
+    var fecha_ini = moment('{{$filtroFechaIni}}');
+    fecha_ini.format("YYYY-MM-DD");
+  @endif
+
+  @if(isset($filtroFechaFin))
+    var fecha_fin = moment('{{$filtroFechaFin}}');
+    fecha_fin.format("YYYY-MM-DD");
+  @endif
+
+  @if(isset($filtroFechaIni) && isset($filtroFechaFin))
+    cb(fecha_ini, fecha_fin);
+  @else
+    cb(moment().startOf('month'), moment().endOf('month'));
+  @endif
+
+  $('#filtroFechas').daterangepicker({
+      ranges: {
+          'Hoy': [moment(), moment()],
+          'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
+          'Últimos 30 días': [moment().subtract(29, 'days'), moment()],
+          'Mes actual': [moment().startOf('month'), moment().endOf('month')],
+          'Mes anterior': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+          'Año actual': [moment().startOf('year'), moment().endOf('year')],
+          'Año anterior': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')],
       },
-      months: {
-        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
-        longhand: ['Enero', 'Febreo', 'Мarzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+      "locale": {
+        "format": "YYYY-MM-DD",
+        "separator": " hasta ",
+        "applyLabel": "Aplicar",
+        "cancelLabel": "Cancelar",
+        "fromLabel": "Desde",
+        "toLabel": "Hasta",
+        "customRangeLabel": "Otro rango",
+        "monthNames": JSON.parse(<?php print json_encode(json_encode($meses)); ?>),
+        "firstDay": 1
       },
-    },
-    onChange: function(dates) {
-      if (dates.length == 2) {
-        var _this = this;
-        var dateArr = dates.map(function(date) {
-          return _this.formatDate(date, 'Y-m-d');
-        });
-        $('#filtroFechaIni').val(dateArr[0]);
-        $('#filtroFechaFin').val(dateArr[1]);
-        // interact with selected dates here
-      }
-    },
-    onReady: function(dateObj, dateStr, instance) {
-      var $cal = $(instance.calendarContainer);
-      if ($cal.find('.flatpickr-clear').length < 1) {
-        $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
-        $cal.find('.flatpickr-clear').on('click', function() {
-          instance.clear();
-          $('#filtroFechaIni').val('');
-          $('#filtroFechaFin').val('');
-          instance.close();
-        });
-      }
-    }
+      @if(isset($filtroFechaIni))
+      "startDate": fecha_ini,
+      @endif
+      @if(isset($filtroFechaIni))
+      "endDate": fecha_fin,
+      @endif
+      showDropdowns: true
+    }, cb);
   });
+</script>
+
+<script>
+
+  function filtroTodos()
+  {
+    $('#paisId').val('');
+    $('#tipoPeticionId').val('');
+    $("#filtro").submit();
+  }
+
+  function filtroPais(paisId)
+  {
+    $('#paisId').val(paisId);
+    $('#tipoPeticionId').val('');
+    $("#filtro").submit();
+  }
+
+  function filtroTipoPeticionPais(paisId,tipoPeticionId)
+  {
+    if(paisId)
+    {
+      $('#paisId').val(paisId);
+    }
+    $('#tipoPeticionId').val(tipoPeticionId);
+    $("#filtro").submit();
+  }
+
+  function filtroTipoPeticion(tipoPeticionId)
+  {
+    $('#tipoPeticionId').val(tipoPeticionId);
+    $('#paisId').val('');
+    $("#filtro").submit();
+  }
 </script>
 
 <script>
@@ -279,11 +344,11 @@ $configData = Helper::appClasses();
   @include('layouts.status-msn')
 
   <div class="row mt-5">
-    <form class="forms-sample" method="GET" action="{{ route('peticion.panel') }}">
+    <form id="filtro" class="forms-sample" method="GET" action="{{ route('peticion.panel') }}">
     <div class="row m-0 p-0">
 
       <!-- Por rango de fechas  -->
-      <div class="col-12 col-md-12 mb-2">
+      <div class="col-12 col-md-12 p-0 mb-2">
         <div class="input-group input-group-merge">
           <span class="input-group-text"><i class="ti ti-calendar"></i></span>
           <input type="text" id="filtroFechaIni" name="filtroFechaIni" value="{{ $filtroFechaIni }}" class="form-control d-none" placeholder="">
@@ -291,17 +356,34 @@ $configData = Helper::appClasses();
           <input id="filtroFechas" name="filtroFechas" type="text" class="form-control" placeholder="YYYY-MM-DD a YYYY-MM-DD" />
         </div>
       </div>
-
     </div>
+
+    <input type="text" id="paisId" name="paisId" value="{{ $paisSeleccionado ? $paisSeleccionado->id : '' }}" class="form-control d-none" placeholder="">
+    <input type="text" id="tipoPeticionId" name="tipoPeticionId" value="{{ $tipoPeticionSeleccionada ? $tipoPeticionSeleccionada->id : '' }}" class="form-control d-none" placeholder="">
+    <div class="mb-3 mt-0">
+          <button onclick="filtroTodos()" type="button" class="btn btn-xs rounded-pill btn-outline-primary waves-effect">Todas las peticiones</button>
+          @if($paisSeleccionado)
+          <i class="tf-icons ti ti-chevron-right scaleX-n1-rtl ti-sm"></i>
+          <button onclick="filtroPais('{{$paisSeleccionado->id}}')" type="button" class="btn btn-xs rounded-pill btn-outline-primary waves-effect">{{$paisSeleccionado->nombre}}</button>
+          @endif
+
+          @if($tipoPeticionSeleccionada)
+          <i class="tf-icons ti ti-chevron-right scaleX-n1-rtl ti-sm"></i>
+            @if($paisSeleccionado)
+            <button onclick="filtroTipoPeticionPais('{{$paisSeleccionado->id}}','{{$tipoPeticionSeleccionada->id}}')" type="button" class="btn btn-xs rounded-pill btn-outline-primary waves-effect">{{$tipoPeticionSeleccionada->nombre}}</button>
+            @else
+            <button onclick="filtroTipoPeticion('{{$tipoPeticionSeleccionada->id}}')" type="button" class="btn btn-xs rounded-pill btn-outline-primary waves-effect">{{$tipoPeticionSeleccionada->nombre}}</button>
+            @endif
+          @endif
+
+        </div>
     </form>
-    @if($peticiones)
-      <span class="text-center py-3">{{ $peticiones->total() > 1 ? $peticiones->total().' Peticiones' : $peticiones->total().' Petición' }} {!! $textoBusqueda ? '('.$textoBusqueda.')' : '' !!}</span>
-    @endif
+
   </div>
 
   <div class="row mb-3">
     <!-- Indicadores -->
-    <div class="col-lg-12 col-md-12 mb-3">
+    <div class="col-lg-12 col-md-12 mb-3 ">
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between">
           <h6 class="card-title text-uppercase mb-0 fw-bold">Indicadores</h6>
@@ -325,77 +407,92 @@ $configData = Helper::appClasses();
     </div>
     <!--/ Indicadores -->
 
-
-    <!-- Por paises -->
     <div class="col-md-4 mb-3">
-      <div class="card h-100">
+
+      <!-- Por paises -->
+      <div class="card mb-3">
         <div class="card-header d-flex justify-content-between">
-          <h6 class="card-title text-uppercase mb-0 fw-bold">Paises</h6>
+          <h6 class="card-title text-uppercase mb-0 fw-bold">Peticiones por paises</h6>
         </div>
         <div class="card-body">
-          @foreach($paises as $pais)
-          <div class="card card-action mb-2">
-            <div class="card-header">
-              <div class="card-action-title">
-              <ul class="p-0 m-0">
-                <li class="d-flex align-items-center mb-0">
-                  <div class="avatar flex-shrink-0 me-2">
-                    <i class="fis fi fi-{{ strtolower($pais->codigo_alpha) }} rounded-circle fs-2"></i>
-                  </div>
-                  <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                    <div class="me-2">
-                      <h5 class="mb-1 fw-bold">{{$pais->nombre}} </h5>
-                      <p class="card-subtitle">Total: {{ $pais->cantidad}}</p>
+          @if($paises->count()>0)
+            @foreach($paises as $pais)
+            <div class="card card-action mb-2">
+              <div class="card-header">
+                <div class="card-action-title">
+                <ul class="p-0 m-0">
+                  <li class="d-flex align-items-center mb-0">
+                    <div class="avatar flex-shrink-0 me-2">
+                      <i class="fis fi fi-{{ strtolower($pais->codigo_alpha) }} rounded-circle fs-2"></i>
                     </div>
-                  </div>
-                </li>
-              </ul>
-              </div>
-              <div class="card-action-element">
-                <ul class="list-inline mb-0">
-                  <li class="list-inline-item">
-                    <a href="javascript:void(0);" class="card-collapsible"><i class="tf-icons ti ti-chevron-right scaleX-n1-rtl ti-sm"></i></a>
+                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                      <div class="me-2">
+                        <h5 class="mb-1 fw-bold">{{$pais->nombre}} </h5>
+                        <p class="card-subtitle">Total: {{ $pais->cantidad}}</p>
+
+
+                      </div>
+                    </div>
                   </li>
                 </ul>
+                </div>
+                <div class="card-action-element">
+
+                  <ul class="list-inline mb-0">
+                    <li class="list-inline-item">
+                      <button onclick="filtroPais('{{$pais->id}}')" class=" btn btn-outline-primary waves-effect btn-xs p-1" data-bs-toggle="tooltip" aria-label="Filtrar peticiones de {{$pais->nombre}}" data-bs-original-title="Filtrar peticiones de {{$pais->nombre}}">
+                        <i class="ti ti-filter ti-xs"></i>
+                      </button>
+                    </li>
+                    <li class="list-inline-item">
+                      <a href="javascript:void(0);" class="card-collapsible"><i class="tf-icons ti ti-chevron-right scaleX-n1-rtl ti-sm"></i></a>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-            <div class="collapse">
-              <div class="card-body pt-0 px-2 pb-2">
-                <ul class="list-unstyled mb-0">
-                  @foreach($pais->tipos as $tipo)
-                    <li class="mb-1 mt-1 p-2 border rounded">
-                      <div class="d-flex align-items-start">
+              <div class="collapse">
+                <div class="card-body pt-0 px-2 pb-2">
+                  <ul class="list-unstyled mb-0">
+                    @foreach($pais->tipos as $tipo)
+                      <li class="mb-1 mt-1 p-2 border rounded">
                         <div class="d-flex align-items-start">
-                          <div class="me-2 ms-1">
-                            <h6 class="mb-0">{{ $tipo->cantidad}}</h6>
-                            <small class="text-muted">{{ $tipo->nombre }} </small>
+                          <div class="d-flex align-items-start">
+                            <div class="me-2 ms-1">
+                              <h6 class="mb-0">{{ $tipo->cantidad}}</h6>
+                              <small class="text-muted">{{ $tipo->nombre }} </small>
+                            </div>
+                          </div>
+
+                          <div class="ms-auto pt-1">
+                            <button  onclick="filtroTipoPeticionPais('{{$pais->id}}','{{$tipo->id}}')" class="btn btn-outline-primary waves-effect btn-xs p-1" data-bs-toggle="tooltip" aria-label="Filtrar peticiones de {{$pais->nombre}} y tipo {{ $tipo->nombre }}" data-bs-original-title="Filtrar peticiones de {{$pais->nombre}} y tipo {{ $tipo->nombre }}">
+                              <i class="ti ti-filter ti-xs"></i>
+                            </button>
                           </div>
                         </div>
-
-                        <div class="ms-auto pt-1">
-                          <a href="https://redilbeta.ubicalo.com/usuario/3/perfil" target="_blank" class="text-body" data-bs-toggle="tooltip" aria-label="Ver perfil" data-bs-original-title="Ver perfil">
-                          <i class="ti ti-user-check me-2 ti-sm"></i></a>
-                        </div>
-                      </div>
-                    </li>
-                  @endforeach
-                </ul>
+                      </li>
+                    @endforeach
+                  </ul>
+                </div>
               </div>
             </div>
+            @endforeach
+          @else
+          <div class="mt-5 mb-5">
+            <center>
+            <i class="ti ti-world-pin ti-xl"></i>
+            <p>En este momento no hay clasificación por paises.</p>
+            </center>
           </div>
-          @endforeach
+          @endif
         </div>
       </div>
-    </div>
-    <!--/ Por paises -->
-
-    <div class="col-md-4 mb-3" >
+      <!--/ Por paises -->
 
       <!-- Grafico por tipo de usuario -->
-      <div class="card mb-4">
+      <div class="card mb-3">
         <div class="card-header d-flex justify-content-between">
           <div>
-            <h6 class="card-title text-uppercase mb-0 fw-bold">Gráfico por tipo de peticiones</h6>
+            <h6 class="card-title text-uppercase mb-0 fw-bold">Gráfico general por tipo de peticiones</h6>
           </div>
         </div>
         <div class="card-body">
@@ -405,8 +502,9 @@ $configData = Helper::appClasses();
             <table class="table">
               <thead>
                 <tr>
-                <th class="fw-bold text-center">Nombre</th>
+                  <th class="fw-bold text-center">Nombre</th>
                   <th class="fw-bold text-center">Cantidad</th>
+                  <th class="fw-bold text-center"></th>
                 </tr>
               </thead>
               <tbody class="table-border-bottom-0">
@@ -414,6 +512,11 @@ $configData = Helper::appClasses();
                 <tr>
                   <td class="text-center">{{ $tipoPenticion->nombre }}</td>
                   <td class="text-center">{{ $tipoPenticion->cantidad }}</td>
+                  <td class="text-center">
+                    <button  onclick="filtroTipoPeticion('{{$tipoPenticion->id}}')" class="btn btn-xs btn-outline-primary waves-effect btn-xs p-1" data-bs-toggle="tooltip" aria-label="Filtrar peticiones de tipo {{ $tipoPenticion->nombre }}" data-bs-original-title="Filtrar peticiones de {{$pais->nombre}} y tipo {{ $tipo->nombre }}">
+                      <i class="ti ti-filter ti-xs"></i>
+                    </button>
+                  </td>
                 </tr>
                 @endforeach
               </tbody>
@@ -423,10 +526,132 @@ $configData = Helper::appClasses();
         </div>
       </div>
       <!-- /Grafico por tipo de usuario -->
-
     </div>
 
+    <!-- Listado de peticiones -->
+    <div class="col-md-8 mb-3 mt-1" >
 
+      @if($peticiones->count() > 0)
+
+      <h6 class="card-title text-uppercase mb-0 fw-bold text-center mb-3 mt-3">Listado de peticiones</h6>
+
+      <div class="row my-1">
+          @if($peticiones)
+          <p> {{$peticiones->lastItem()}} <b>de</b> {{$peticiones->total()}} <b>peticiones - Página</b> {{ $peticiones->currentPage() }} </p>
+          {!! $peticiones->appends(request()->input())->links() !!}
+          @endif
+        </div>
+        <!-- lista de peticiones -->
+        <div class="row g-3">
+          @foreach($peticiones as $peticion)
+          <div class="col-12 col-xl-6 col-lg-6 col-md-6">
+            <div class="card border rounded p-2">
+
+              <div class="card-header">
+                <div class="d-flex align-items-start">
+                  <div class="d-flex align-items-start">
+                    <div class="px-1">
+                      <button class="btn rounded-pill btn-icon btn-{{ $peticion->estado == 3 ? 'warning' : ($peticion->estado == 2 ? 'success' : 'primary' ) }} waves-effect waves-light btn-xl"><i class="ti ti-notes ti-xl mx-2"></i></button>
+                    </div>
+                    <div class="me-2 ms-1 mt-1">
+                      <h5 class="mb-0"><a href="javascript:;" class="text-body"><b>Tipo:</b> {{ $peticion->tipoPeticion ? $peticion->tipoPeticion->nombre : 'No definido'}}</a></h5>
+                      <div class="client-info"><span class="fw-medium"><i class="ti ti-calendar"></i> {{ $peticion->fecha }}</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+
+              <div class="d-flex align-items-center">
+                <ul class="list-unstyled d-flex align-items-center avatar-group mb-0 zindex-2">
+                    <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="{{$peticion->nombreUsuario}}" class="avatar pull-up">
+                      <img class="rounded-circle" src="{{ $configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$peticion->fotoUsuario) : $configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$peticion->fotoUsuario }}" alt="foto {{$peticion->nombreUsuario}}">
+                    </li>
+                    <span class="text-muted mx-1">{{ $peticion->nombreUsuario }}</span>
+                </ul>
+              </div>
+              <div class="list-unstyled mb-4 mt-3">
+                <ul class="list-unstyled mb-4 mt-3">
+                  <li class="d-flex align-items-center mb-1"><i class="ti ti-phone-call text-heading"></i> <span class="mx-2">{{ $peticion->telefonosUsuario }}</span> </li>
+                  <li class="d-flex align-items-center mb-1"><i class="ti ti-mail text-heading"></i> <span class="mx-2">{{ $peticion->emailUsuario }}</span></li>
+
+                </ul>
+              </div>
+
+              <div class="accordion mt-3" id="accordionDePeticiones{{$peticion->id}}">
+
+                <div class="card accordion-item">
+                  <h2 class="accordion-header" id="headingPeticion{{$peticion->id}}">
+                    <button type="button" class="accordion-button collapsed fw-bold" data-bs-toggle="collapse" data-bs-target="#accordionPeticion{{$peticion->id}}" aria-expanded="true" aria-controls="accordionPeticion{{$peticion->id}}">
+                      Petición
+                    </button>
+                  </h2>
+
+                  <div id="accordionPeticion{{$peticion->id}}" class="accordion-collapse collapse" data-bs-parent="#accordionDePeticiones{{$peticion->id}}">
+                    <div class="accordion-body" style="height: 100px; overflow-y: scroll;">
+                      <p class="text-secondary mt-0 mb-2"><b><i class="ti ti-user-circle"></i> Creada por:</b> {{$peticion->usuarioCreacion }}</p>
+                      <p class="m-0">{!! $peticion->descripcion !!}</p>
+                    </div>
+                  </div>
+                </div>
+
+                @if($peticion->estado > 1)
+                <div class="card accordion-item">
+                  <h2 class="accordion-header" id="headingSeguimiengo{{$peticion->id}}">
+                    <button type="button" class="accordion-button collapsed fw-bold" data-bs-toggle="collapse" data-bs-target="#accordionSeguimiengo{{$peticion->id}}" aria-expanded="false" aria-controls="accordionSeguimiengo{{$peticion->id}}">
+                      Seguimiento
+                    </button>
+                  </h2>
+                  <div id="accordionSeguimiengo{{$peticion->id}}" class="accordion-collapse collapse" aria-labelledby="headingSeguimiengo{{$peticion->id}}" data-bs-parent="#accordionDePeticiones{{$peticion->id}}">
+                    <div class="accordion-body" style="height: 100px; overflow-y: scroll;">
+                      @foreach($peticion->seguimientos as $seguimiento)
+                      <p class="text-secondary mt-0 mb-2"><b><i class="ti ti-user-circle"></i> Creada por:</b> {{$seguimiento->usuarioCreacion ? $seguimiento->usuarioCreacion->nombre(3) : 'No definido' }}</p>
+                      <p class="m-0">{!! $seguimiento->descripcion !!}</p>
+                      <hr>
+                      @endforeach
+                    </div>
+                  </div>
+                </div>
+                @endif
+
+                @if($peticion->estado==2)
+                <div class="card accordion-item">
+                  <h2 class="accordion-header" id="headingRespuesta{{$peticion->id}}">
+                    <button type="button" class="accordion-button collapsed fw-bold" data-bs-toggle="collapse" data-bs-target="#accordionRespuesta{{$peticion->id}}" aria-expanded="false" aria-controls="accordionRespuesta{{$peticion->id}}">
+                      Respuesta
+                    </button>
+                  </h2>
+                  <div id="accordionRespuesta{{$peticion->id}}" class="accordion-collapse collapse" aria-labelledby="headingRespuesta{{$peticion->id}}" data-bs-parent="#accordionDePeticiones{{$peticion->id}}">
+                    <div class="accordion-body">
+                      {!! $peticion->respuesta !!}
+                    </div>
+                  </div>
+                </div>
+                @endif
+              </div>
+
+              </div>
+            </div>
+          </div>
+          @endforeach
+        </div>
+        <!--/ lista de peticiones -->
+
+        <div class="row my-3">
+          @if($peticiones)
+          <p> {{$peticiones->lastItem()}} <b>de</b> {{$peticiones->total()}} <b>peticiones - Página</b> {{ $peticiones->currentPage() }} </p>
+          {!! $peticiones->appends(request()->input())->links() !!}
+          @endif
+        </div>
+      @else
+        <div class="mt-5 mb-5 py-5">
+          <center>
+          <i class="ti ti-notes ti-xl"></i>
+          <p>En este momento no hay ninguna petición.</p>
+          </center>
+        </div>
+      @endif
+    </div>
+    <!-- /Listado de peticiones -->
   </div>
-
 @endsection

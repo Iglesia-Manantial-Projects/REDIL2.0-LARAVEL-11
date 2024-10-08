@@ -29,9 +29,12 @@ class PeticionController extends Controller
   {
     $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
     $configuracion = Configuracion::find(1);
-    $peticiones = [];
+    $peticiones = collect();
     $indicadores = [];
     $tiposPeticiones = TipoPeticion::orderBy('orden', 'asc')->get();
+
+    $paisSeleccionado = null;
+    $tipoPeticionSeleccionada = null;
 
 
     if ( $rolActivo->hasPermissionTo('peticiones.lista_peticiones_todas') || $rolActivo->hasPermissionTo('peticiones.lista_peticiones_solo_ministerio') )
@@ -48,10 +51,64 @@ class PeticionController extends Controller
 
     }
 
-    $filtroFechaIni = $request->filtroFechaIni ? $request->filtroFechaIni : Carbon::now()->firstOfYear()->format('Y-m-d');
-    $filtroFechaFin = $request->filtroFechaFin ? $request->filtroFechaFin : Carbon::now()->format('Y-m-d');
-    //$peticiones = $peticiones->whereBetween('fecha', [$filtroFechaIni, $filtroFechaFin]);
+    $arrayPaises = $peticiones->where('pais_id', '!=', null)->unique('pais_id')->pluck('pais_id')->toArray();
+    $paises = Pais::whereIn('id', $arrayPaises)->get();
+
+
+
+    $paises->map(function ($pais)  use ($peticiones, $tiposPeticiones){
+      $peticionesPaises = clone $peticiones;
+      $pais->cantidad = $peticionesPaises->where('pais_id', $pais->id)->count();
+
+      $tipos =  [];
+      foreach ($tiposPeticiones as $tipoPeticion)
+      {
+        $item = new stdClass();
+        $item->id = $tipoPeticion->id;
+        $item->nombre = $tipoPeticion->nombre;
+        $item->cantidad = $tipoPeticion->peticiones()->where('pais_id',$pais->id)->select('id')->count();
+        $tipos[] = $item;
+      }
+
+      $pais->tipos = $tipos;
+
+    });
+
+    //tiposPeticiones
+    $tiposPeticiones->map(function ($tipoPeticion)  use ($peticiones){
+      $peticionesPaises = clone $peticiones;
+      $tipoPeticion->cantidad = $peticionesPaises->where('tipo_peticion_id', $tipoPeticion->id)->count();
+    });
+
+    $labelsTiposPeticiones= $tiposPeticiones->pluck('nombre')->toArray();
+    $seriesTiposPeticiones = $tiposPeticiones->pluck('cantidad')->toArray();
+    $primerSerieTipoPeticion = $seriesTiposPeticiones[0] ? $seriesTiposPeticiones[0] : 0;
+    $primerLabelTipoPeticion = $labelsTiposPeticiones[0] ? $labelsTiposPeticiones[0]: '';
+
+
+    // Filtro por fechas
+    $filtroFechaIni = $request->filtroFechaIni ? Carbon::parse($request->filtroFechaIni)->format('Y-m-d') : Carbon::now()->firstOfMonth()->format('Y-m-d');
+    $filtroFechaFin = $request->filtroFechaFin ? Carbon::parse($request->filtroFechaFin)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+
+    $peticiones = $peticiones->whereBetween('fecha', [$filtroFechaIni, $filtroFechaFin]);
     //$textoBusqueda .= '<b>, Rango </b> Del ' . $filtroFechaIni . ' al ' . $filtroFechaFin;
+
+
+
+    // Filtro por pais
+    if($request->paisId)
+    {
+      $peticiones=$peticiones->where('pais_id', $request->paisId);
+      $paisSeleccionado = Pais::find($request->paisId);
+    }
+
+    // Filtro por tipo peticion
+    if($request->tipoPeticionId)
+    {
+      $tipoPeticionSeleccionada = TipoPeticion::find($request->tipoPeticionId);
+      $peticiones=$peticiones->where('tipo_peticion_id', $request->tipoPeticionId);
+    }
+
 
     $item = new stdClass();
     $item->nombre = 'Total peticiones';
@@ -94,38 +151,8 @@ class PeticionController extends Controller
     $indicadores[] = $item;
 
 
-    $arrayPaises = $peticiones->where('pais_id', '!=', null)->unique('pais_id')->pluck('pais_id')->toArray();
-    $paises = Pais::whereIn('id', $arrayPaises)->get();
 
 
-    $paises->map(function ($pais)  use ($peticiones, $tiposPeticiones){
-      $peticionesPaises = clone $peticiones;
-      $pais->cantidad = $peticionesPaises->where('pais_id', $pais->id)->count();
-
-      $tipos =  [];
-      foreach ($tiposPeticiones as $tipoPeticion)
-      {
-        $item = new stdClass();
-        $item->id = $tipoPeticion->id;
-        $item->nombre = $tipoPeticion->nombre;
-        $item->cantidad = $tipoPeticion->peticiones()->where('pais_id',$pais->id)->select('id')->count();
-        $tipos[] = $item;
-      }
-
-      $pais->tipos = $tipos;
-
-    });
-
-    //tiposPeticiones
-    $tiposPeticiones->map(function ($tipoPeticion)  use ($peticiones){
-      $peticionesPaises = clone $peticiones;
-      $tipoPeticion->cantidad = $peticionesPaises->where('tipo_peticion_id', $tipoPeticion->id)->count();
-    });
-
-    $labelsTiposPeticiones= $tiposPeticiones->pluck('nombre')->toArray();
-    $seriesTiposPeticiones = $tiposPeticiones->pluck('cantidad')->toArray();
-    $primerSerieTipoPeticion = $seriesTiposPeticiones[0] ? $seriesTiposPeticiones[0] : 0;
-    $primerLabelTipoPeticion = $labelsTiposPeticiones[0] ? $labelsTiposPeticiones[0]: '';
 
 
     if ($peticiones->count() > 0) {
@@ -157,6 +184,8 @@ class PeticionController extends Controller
       $peticiones = User::whereRaw('1=2')->paginate(1);
     }
 
+    $meses = Helpers::meses('largo');
+
     return view('contenido.paginas.peticiones.panel', [
       'rolActivo' => $rolActivo,
       'peticiones' => $peticiones,
@@ -170,7 +199,10 @@ class PeticionController extends Controller
       'textoBusqueda' => '',
       'filtroFechaIni' => $filtroFechaIni,
       'filtroFechaFin' => $filtroFechaFin,
-      'paises' => $paises
+      'paises' => $paises,
+      'meses' => $meses,
+      'paisSeleccionado' => $paisSeleccionado,
+      'tipoPeticionSeleccionada' => $tipoPeticionSeleccionada
     ]);
   }
 
@@ -182,7 +214,8 @@ class PeticionController extends Controller
     $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
     $configuracion = Configuracion::find(1);
     $tiposPeticiones = TipoPeticion::orderBy('orden', 'asc')->get();
-    $peticiones = [];
+    $paises = Pais::select('id','nombre')->orderBy('nombre', 'asc')->get();
+    $peticiones = collect();
     $indicadores = [];
     $buscar='';
     $textoBusqueda = '';
@@ -204,6 +237,7 @@ class PeticionController extends Controller
         ->select('peticiones.*','users.foto','users.telefono_fijo', 'users.telefono_movil', 'users.telefono_otro', 'users.email', 'users.primer_nombre','users.segundo_nombre', 'users.primer_apellido')
         ->get();
       }
+
 
     }
 
@@ -264,6 +298,22 @@ class PeticionController extends Controller
       ->toArray();
 
       $textoBusqueda .= '<b>, Tipo de peticiones: </b>"' . implode(', ', $tps) . '"';
+      $bandera = 1;
+    }
+
+    // filtro por paises
+    $filtroPaises = [];
+    if ($request->filtroPaises)
+    {
+      $filtroPaises = $request->filtroPaises;
+      $peticiones = $peticiones->whereIn('pais_id', $request->filtroPaises);
+
+      $textoPaises = Pais::whereIn('id', $request->filtroPaises)
+      ->select('nombre')
+      ->pluck('nombre')
+      ->toArray();
+
+      $textoBusqueda .= '<b>, Paises: </b>"' . implode(', ', $textoPaises) . '"';
       $bandera = 1;
     }
 
@@ -352,7 +402,9 @@ class PeticionController extends Controller
       'camposInformeExcel' => $camposInformeExcel,
       'pasosCrecimiento' => $pasosCrecimiento,
       'camposExtras' => $camposExtras,
-      'camposPeticiones' => $camposPeticiones
+      'camposPeticiones' => $camposPeticiones,
+      'paises' => $paises,
+      'filtroPaises' => $filtroPaises
     ]);
 
   }

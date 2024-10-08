@@ -397,6 +397,7 @@ $configData = Helper::appClasses();
 
     <div class="row my-3">
       @if($personas)
+      <p> {{$personas->lastItem()}} <b>de</b> {{$personas->total()}} <b>personas - Página</b> {{ $personas->currentPage() }} </p>
       {!! $personas->appends(request()->input())->links() !!}
       @endif
     </div>
