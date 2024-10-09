@@ -1103,8 +1103,8 @@ $configData = Helper::appClasses();
 
 <script>
    $('#identificacion').keyup(function () {
-    alert('entre');
-    /*
+
+
     clearTimeout($.data(this, 'timer'));
     if($("#identificacion").val()!='')
     {
@@ -1118,7 +1118,7 @@ $configData = Helper::appClasses();
       }
       @endif
     }
-    */
+
 
   });
 
