@@ -162,7 +162,7 @@ if (this.checked) {
     <!-- botonera -->
     <div class="d-flex mb-1 mt-5">
       <div class="me-auto">
-        <button type="submit" class="btn btn-primary me-1 btnGuardar">Guardar22</button>
+        <button type="submit" class="btn btn-primary me-1 btnGuardar">Guardar</button>
         <a type="reset" href="{{ url()->previous() }}" class="btn btn-label-secondary">Cancelar</a>
       </div>
       <div class="p-2 bd-highlight">
@@ -214,7 +214,7 @@ if (this.checked) {
                       <option  value="{{$tipoIdentificacion->id}}" {{ old('tipo_identificación')==$tipoIdentificacion->id ? 'selected' : '' }}>{{$tipoIdentificacion->nombre}}</option>
                       @endforeach
                   </select>
-                  @if($errors->has('tipo_identificación')) <div class="text-danger form-label">{{ $errors->first('tipo_identificación') }}</div> @endif
+                  @if($errors->has('tipo_identificación')) <div class="text-danger form-label">{{ $errors->first('tipo_identificación') }} </div> @enderror
                 </div>
               @endif
               <!--  Tipo de id  -->

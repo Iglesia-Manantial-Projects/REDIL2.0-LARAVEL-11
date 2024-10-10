@@ -7,23 +7,32 @@ $configData = Helper::appClasses();
 @section('title', 'Nuevo usuario')
 
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/cropperjs/cropper.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+'resources/assets/vendor/libs/select2/select2.scss',
+'resources/assets/vendor/libs/cropperjs/cropper.css',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{ asset('assets/vendor/libs/cropperjs/cropper.js') }}"></script>
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+'resources/assets/vendor/libs/cropperjs/cropper.js',
+])
 @endsection
 
+
 @section('page-script')
-<script src="{{asset('assets/js/form-basic-inputs.js')}}"></script>
-<script src="{{asset('assets/js/cropper.js')}}"></script>
-<script>
+@vite([
+'resources/assets/js/form-basic-inputs.js',
+'resources/assets/vendor/libs/cropperjs/cropper.js',
+
+
+])
+<script type="module">
   $(".fecha-picker").flatpickr({
     dateFormat: "Y-m-d"
   });
@@ -37,7 +46,7 @@ $configData = Helper::appClasses();
   });
 </script>
 
-<script>
+<script type="module">
   window.addEventListener('msn', event => {
     Swal.fire({
       title: event.detail.msnTitulo,
@@ -51,7 +60,7 @@ $configData = Helper::appClasses();
   });
 </script>
 
-<script>
+<script type="module">
   window.addEventListener('bloquedoBtnGuardar', event => {
     $(".btnGuardar").attr('disabled', 'disabled');
   });
@@ -61,7 +70,7 @@ $configData = Helper::appClasses();
   });
 </script>
 
-<script>
+<script type="module">
   $('.selectorGenero').on('change', function(event) {
     if ($("#imagen-recortada").val() == "") {
       @if($usuario->foto == "default-m.png" || $usuario->foto == "default-f.png")
@@ -75,7 +84,7 @@ $configData = Helper::appClasses();
   });
 </script>
 
-<script>
+<script type="module">
   $('#tienesUnaPeticion').change(function() {
 
     if (this.checked) {
@@ -96,7 +105,7 @@ $configData = Helper::appClasses();
   });
 </script>
 
-<script type="text/javascript">
+<script type="module">
   function sinComillas(e) {
     tecla = (document.all) ? e.keyCode : e.which;
     patron = /[\x5C'"]/;
@@ -124,7 +133,7 @@ $configData = Helper::appClasses();
   });
 </script>
 
-<script type="text/javascript">
+<script type="module">
   $('#formulario').submit(function() {
     $('.btnGuardar').attr('disabled', 'disabled');
 
@@ -1183,7 +1192,9 @@ $configData = Helper::appClasses();
             <select id="{{$campo->class_id}}" name="{{$campo->class_id}}" class="form-control">
               <option value="">Ninguno</option>
               @foreach (json_decode($campo->opciones_select) as $opcion)
+
               <option value="{{$opcion->value}}" {{ old($campo->class_id, $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first() ? $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()->pivot->valor : '' ) == $opcion->value ? 'selected' : '' }}> {{ ucwords($opcion->nombre) }} </option>
+
               @endforeach
             </select>
             @endif
@@ -1193,12 +1204,18 @@ $configData = Helper::appClasses();
             @if($campo->tipo_de_campo == 4 && $campo->pivot->visible)
             <select id="{{$campo->class_id}}" name="{{$campo->class_id}}[]" multiple class="select2 form-control">
               @foreach (json_decode($campo->opciones_select) as $opcion)
-              <option value="{{$opcion->value}}" {{ in_array($opcion->value, old( $campo->class_id,
-                              $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()
+
+              <option value="{{$opcion->value}}"
+
+                          {{ in_array($opcion->value, old( $campo->class_id,
+                              $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first() &&  $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()->valor
                               ? json_decode($usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()->pivot->valor)
                               : [] )
                             )
-                          ? "selected" : "" }}> {{ ucwords($opcion->nombre) }} </option>
+                          ? "selected" : "" }}
+
+                  > {{ ucwords($opcion->nombre) }} </option>
+
               @endforeach
             </select>
             @endif

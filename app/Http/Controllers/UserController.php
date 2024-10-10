@@ -1521,6 +1521,11 @@ class UserController extends Controller
 
   public function crear(Request $request, FormularioUsuario $formulario)
   {
+
+ // $request->validate($validated);
+
+
+
     $configuracion = Configuracion::find(1);
     $rolActivo = null;
 
@@ -1530,7 +1535,7 @@ class UserController extends Controller
     $validacion = [];
 
     //fecha_nacimiento
-    if ($formulario->visible_fecha_nacimiento == true) {
+   if ($formulario->visible_fecha_nacimiento == true) {
       $validarFechaNacimiento = $formulario->obligatorio_fecha_nacimiento ? ['date', 'required'] : ['date', 'nullable'] ;
       $validacion = array_merge($validacion, ['fecha_nacimiento' => $validarFechaNacimiento]);
     }
@@ -1772,6 +1777,7 @@ class UserController extends Controller
       }
     }
 
+
     // Validacion de datos
     $request->validate($validacion);
 
@@ -1823,7 +1829,10 @@ class UserController extends Controller
     $usuario->nombre_acudiente = $request->nombre_del_acudiente;
     $usuario->telefono_acudiente = $request->teléfono_del_acudiente;
 
-    if ($usuario->save()) {
+    return $formulario->camposExtras;
+
+    if ($usuario->save())
+    {
       // Email
       $email = empty($request->email) ? $usuario->id . '@' . 'correopordefecto.com' : mb_strtolower($request->email);
 
@@ -2010,13 +2019,17 @@ class UserController extends Controller
       /// esta sección es para el guardado de los campos extra ($('#ministerio_asociado_principal option:selected').val());
       if ($configuracion->visible_seccion_campos_extra == true) {
         $camposExtraFormulario = $formulario->camposExtras;
-        foreach ($camposExtraFormulario as $campoExtra) {
-          if ($campoExtra->visible == true) {
-            if ($campoExtra->tipo_de_campo != 4) {
+        foreach ($camposExtraFormulario as $campoExtra)
+        {
+          if ($campoExtra->visible == true)
+          {
+            if ($campoExtra->tipo_de_campo != 4)
+            {
               $usuario
                 ->camposExtras()
                 ->attach($campoExtra->id, ['valor' => ucwords(mb_strtolower($request[$campoExtra->class_id]))]);
             } else {
+
               $usuario
                 ->camposExtras()
                 ->attach($campoExtra->id, ['valor' => json_encode($request[$campoExtra->class_id])]);
