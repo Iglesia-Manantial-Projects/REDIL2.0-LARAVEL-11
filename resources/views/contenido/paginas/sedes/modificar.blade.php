@@ -8,22 +8,94 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/cropperjs/cropper.css')}}" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+'resources/assets/vendor/libs/select2/select2.scss',
+
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/cropperjs/cropper.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+
+])
 @endsection
 
 @section('page-script')
-<script src="{{asset('assets/js/cropper.js')}}"></script>
-<script>
+<script type="module">
+
+  $(function () {
+    'use strict';
+
+    var croppingImage = document.querySelector('#croppingImage'),
+      //img_w = document.querySelector('.img-w'),
+      cropBtn = document.querySelector('.crop'),
+      croppedImg = document.querySelector('.cropped-img'),
+      dwn = document.querySelector('.download'),
+      upload = document.querySelector('#cropperImageUpload'),
+      modalImg = document.querySelector('.modal-img'),
+      inputResultado = document.querySelector('#imagen-recortada'),
+      cropper = '';
+
+    setTimeout(() => {
+      cropper = new Cropper( croppingImage, {
+        zoomable: false,
+        aspectRatio: 1,
+        cropBoxResizable: true
+      });
+    }, 1000);
+
+    // on change show image with crop options
+    upload.addEventListener('change', function (e) {
+      if (e.target.files.length) {
+        console.log(e.target.files[0]);
+        var fileType = e.target.files[0].type;
+        if (fileType === 'image/gif' || fileType === 'image/jpeg' || fileType === 'image/png') {
+          cropper.destroy();
+          // start file reader
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            if (e.target.result) {
+              croppingImage.src = e.target.result;
+              cropper = new Cropper(croppingImage, {
+                zoomable: false,
+                aspectRatio: 1,
+                cropBoxResizable: true
+              });
+            }
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        } else {
+          alert('Selected file type is not supported. Please try again');
+        }
+      }
+    });
+
+    // crop on click
+    cropBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      // get result to data uri
+      let imgSrc = cropper
+        .getCroppedCanvas({
+          width: 300 // input value
+        })
+        .toDataURL();
+      croppedImg.src = imgSrc;
+      inputResultado.value = imgSrc;
+      //dwn.setAttribute('href', imgSrc);
+      //dwn.download = 'imagename.png';
+    });
+  });
+
+</script>
+<script type="module">
   $(".fecha-picker").flatpickr({
     dateFormat: "Y-m-d"
   });

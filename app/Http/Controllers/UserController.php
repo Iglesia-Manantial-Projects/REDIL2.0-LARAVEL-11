@@ -1829,7 +1829,6 @@ class UserController extends Controller
     $usuario->nombre_acudiente = $request->nombre_del_acudiente;
     $usuario->telefono_acudiente = $request->teléfono_del_acudiente;
 
-    return $formulario->camposExtras;
 
     if ($usuario->save())
     {

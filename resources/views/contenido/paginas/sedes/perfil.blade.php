@@ -8,17 +8,21 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/apex-charts/apex-charts.css')}}" />
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+'resources/assets/vendor/libs/apex-charts/apex-charts.scss',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/apex-charts/apexcharts.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/apex-charts/apexcharts.js',
+])
 @endsection
 
 @section('page-script')
-<script>
+<script type="module">
   let cardColor, headingColor, labelColor, borderColor, legendColor;
 
   if (isDarkStyle) {
@@ -148,7 +152,7 @@ $configData = Helper::appClasses();
     },
   };
   if (typeof graficoCrecimientoGrupos !== undefined && graficoCrecimientoGrupos !== null) {
-    areaChartCrecimientoGrupos = new ApexCharts(graficoCrecimientoGrupos, graficoCrecimientoGruposConfig);
+   var areaChartCrecimientoGrupos = new ApexCharts(graficoCrecimientoGrupos, graficoCrecimientoGruposConfig);
     areaChartCrecimientoGrupos.render();
   }
   // grafico crecimiento de grupos
@@ -237,7 +241,7 @@ $configData = Helper::appClasses();
     },
   };
   if (typeof graficoCrecimientoPersonas !== undefined && graficoCrecimientoPersonas !== null) {
-    areaChartCrecimientoPersonas = new ApexCharts(graficoCrecimientoPersonas, graficoCrecimientoPersonasConfig);
+    var areaChartCrecimientoPersonas = new ApexCharts(graficoCrecimientoPersonas, graficoCrecimientoPersonasConfig);
     areaChartCrecimientoPersonas.render();
   }
   // grafico crecimiento de personas
@@ -675,7 +679,7 @@ $configData = Helper::appClasses();
 
 </script>
 
-<script>
+<script type="module">
   $('.confirmacionEliminar').on('click', function () {
     let nombre = $(this).data('nombre');
     let id = $(this).data('id');
@@ -705,7 +709,7 @@ $configData = Helper::appClasses();
     <div class="dropdown d-flex border rounded py-2 px-4 ">
       <button type="button" class="btn dropdown-toggle hide-arrow p-0" data-bs-toggle="dropdown" aria-expanded="false">Opciones <i class="ti ti-dots-vertical text-muted"></i></button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="">Modificar</a></li>
+        <li><a class="dropdown-item" href="{{ route('sede.modificar', $sede)}}">Modificar</a></li>
 
         @if($rolActivo->hasPermissionTo('sedes.opcion_eliminar_sede'))
           <li><a class="dropdown-item confirmacionEliminar" data-nombre="{{ $sede->nombre }}" data-id="{{ $sede->id }}" href="javascript:;">Eliminar</a></li>

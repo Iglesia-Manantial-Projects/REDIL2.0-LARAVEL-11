@@ -8,16 +8,21 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+])
 @endsection
 
 @section('page-script')
-<script>
-  $('.confirmacionEliminar').on('click', function () {
+<script type="module">
+  $('.confirmacionEliminar').on('click', function ()
+  {
     let nombre = $(this).data('nombre');
     let id = $(this).data('id');
 
