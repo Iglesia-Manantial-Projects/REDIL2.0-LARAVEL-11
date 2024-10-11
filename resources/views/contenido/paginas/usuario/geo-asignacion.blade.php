@@ -8,9 +8,11 @@ $isFooter = ($isFooter ?? false);
 @section('title', 'Geo asignación')
 
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+'resources/assets/vendor/libs/select2/select2.scss',
+])
 @endsection
 
 @section('page-style')
@@ -18,21 +20,39 @@ $isFooter = ($isFooter ?? false);
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+])
 @endsection
 
 @section('page-script')
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+<script  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
 
-<script>
+<script type='module'>
+ // Define la función en el ámbito global
+ window.asignarAsistente = function(grupoId, idUsuario) {
+    Livewire.dispatch('asignar-al-grupo', { grupoId: grupoId, idUsuario: idUsuario });
+  };
+
   var map = L.map('map').setView(['{{$latitudInicial}}', '{{$longitudInicial}}'], 13);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
 
-  //var osmGeocoder = new L.Control.OSMGeocoder();
+  // Agregar estilos CSS para el efecto hover
+  var style = document.createElement('style');
+  style.textContent = `
+    .custom-popup {
+      transition: background-color 0.3s ease;
+    }
+    .custom-popup:hover {
+      color: #7367f0;
+
+    }
+  `;
+  document.head.appendChild(style);
 
   @foreach($grupos as $grupo)
     @if($grupo->latitud != null && $grupo->longitud != null && $grupo->tipoGrupo->visible_mapa_asignacion == true)
@@ -54,9 +74,10 @@ $isFooter = ($isFooter ?? false);
       var nombreUsuario = "{{$usuario->nombre(3)}}";
       var idUsuario = "{{$usuario->id}}";
 
-      DatosCelula = [{
+      var DatosCelula = [{
         "info": "Agregar a <b>'" + nombreUsuario + "'</b> al Grupo  <b>" + tipoGrupo + " '" + nombreGrupo + "'" + direccionGrupo + "</b><br><br> <b><i class='ti ti-circle-plus'></i>Clic aquí para agregar </b>",
-        "url": "javascript:asignarAsistente(" + grupoId + "," + idUsuario + ");"
+        "grupoId": grupoId,
+        "idUsuario": idUsuario
       }];
 
       L.marker(['{{$grupo->latitud}}', '{{$grupo->longitud}}'], {
@@ -64,17 +85,22 @@ $isFooter = ($isFooter ?? false);
         title: 'title',
         alt: 'alt'
       })
-      .bindPopup('<a href="' + DatosCelula[0].url + '" target="">' + DatosCelula[0].info + '</a>')
+      .bindPopup(function (layer) {
+        var popupContent = L.DomUtil.create('div', 'custom-popup');
+        popupContent.innerHTML = DatosCelula[0].info;
+        L.DomEvent.on(popupContent, 'click', function() {
+          asignarAsistente(DatosCelula[0].grupoId, DatosCelula[0].idUsuario);
+        });
+        return popupContent;
+      })
       .addTo(map);
 
     @endif
   @endforeach
+  </script>
 
-  function asignarAsistente(grupoId, idUsuario) {
-    Livewire.dispatch('asignar-al-grupo', { grupoId: grupoId, idUsuario: idUsuario });
-  }
-</script>
-<script>
+
+<script type="module">
   window.addEventListener('verEnElMapa', event => {
     map.flyTo(new L.LatLng(event.detail.latitud, event.detail.longitud), event.detail.zoom);
   });

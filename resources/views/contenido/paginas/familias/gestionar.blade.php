@@ -8,22 +8,31 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/css/pages/page-profile.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/bootstrap-select/bootstrap-select.css')}}" />
+@vite([
+'resources/assets/vendor/scss/pages/page-profile.scss',
+'resources/assets/vendor/libs/select2/select2.scss',
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+'resources/assets/vendor/libs/bootstrap-select/bootstrap-select.scss',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/bootstrap-select/bootstrap-select.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+'resources/assets/vendor/libs/bootstrap-select/bootstrap-select.js',
+])
 @endsection
 
 @section('page-script')
-<script type="text/javascript">
+<script type="module">
+window.abrirModalActualizarPariente= function(relacionId,usuarioId)
+  {
+    Livewire.dispatch('abrirModalActualizarPariente', { relacionId: relacionId , usuarioId: usuarioId} );
+  }
+
   ///confirmación para eliminar tema
   $('.confirmacionEliminar').on('click', function () {
     let nombre = $(this).data('nombre');
@@ -44,10 +53,7 @@ $configData = Helper::appClasses();
     })
   });
 
-  function abrirModalActualizarPariente(relacionId,usuarioId)
-  {
-    Livewire.dispatch('abrirModalActualizarPariente', { relacionId: relacionId , usuarioId: usuarioId} );
-  }
+
 
 </script>
 @endsection
@@ -78,17 +84,17 @@ $configData = Helper::appClasses();
           'queUsuariosCargar'=>'todos',
           'modulo' => 'familiar-principal',
           'redirect'=> 'familias.gestionar',
-          'usuarioSeleccionadoId'=>$userId ? $userId : ''       
+          'usuarioSeleccionadoId'=>$userId ? $userId : ''
         ])
       </div>
-     
+
     </div>
     <!--/ Familiar principal -->
   </div>
 
- 
+
   <div class=" col-lg-9 col-md-7 col-xs-12">
-  
+
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between">
         <p class="card-text text-uppercase fw-bold"><i class="ti ti-home-star ms-n1 me-2"></i>MIS RELACIONES FAMILIARES</p>
@@ -96,14 +102,14 @@ $configData = Helper::appClasses();
         <button type="button" class="btn btn-sm btn-label-primary waves-effect" data-bs-toggle="modal" data-bs-target="#onboardHorizontalImageModal"> <i class="ti ti-user-plus pb-1"></i> Nueva relación</button>
        @endif
       </div>
-      
+
       <div class="card-body">
         <div class="row g-4">
           @if(count($parientes) > 0)
           @foreach($parientes as $pariente)
           <div class="col-lg-4 col-md-12 col-xs-12">
             <div class="card border rounded">
-             
+
               <div class="dropdown btn-pinned border rounded p-1">
                 <button type="button" class="btn dropdown-toggle hide-arrow p-0" data-bs-toggle="dropdown" aria-expanded="false"><i class="ti ti-dots-vertical text-muted"></i></button>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -117,10 +123,10 @@ $configData = Helper::appClasses();
                       <span class="me-2">Eliminar relación</span>
                     </a>
                   </li>
-                
-                </ul>  
-              </div> 
-          
+
+                </ul>
+              </div>
+
               <div class="card-body text-center">
                 <div class="mx-auto my-3">
                   <img src="{{ $configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$pariente->foto) : $configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$pariente->foto }}" alt="foto {{$pariente->primer_nombre}}" class="rounded-circle w-px-100" />
@@ -151,34 +157,34 @@ $configData = Helper::appClasses();
           @endif
         </div>
       </div>
-   
+
     </div>
- 
+
   </div>
 
     <!-- SECCIÓN MODALES -->
     @if($userId)
     <div class="modal-onboarding modal fade animate__animated" id="onboardHorizontalImageModal" tabindex="-1" aria-hidden="true">
       <form id="formulario" role="form" class="forms-sample" method="get" action="{{ route('familias.crear') }}"  enctype="multipart/form-data" >
-        
+
         <div class="modal-dialog  modal-lg" role="document">
           <div class="modal-content text-center">
             <div class="modal-header border-0">
-              
+
               <butto  type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar">
               </button>
             </div>
             <div class="modal-body  p-0">
-              
+
               <div class="onboarding-content mb-0">
                 <h4 class="onboarding-title text-body">NUEVA RELACIÓN FAMILIAR</h4>
                 <div class="onboarding-info">Elige los campos necesarios para crear tu relación familiar</div>
-                 
+
                 <div class="row mt-3">
                     <!-- Familiar principal -->
                    <div class="col-lg-12 col-md-12 col-sm-12  mt-3">
                     <div class="card-header d-flex justify-content-between">
-                    
+
                       @livewire('Usuarios.usuarios-para-busqueda', [
                         'id' => 'buscador_asistente_modal',
                         'tipoBuscador' => 'unico',
@@ -186,11 +192,11 @@ $configData = Helper::appClasses();
                         'class' => 'col-12 col-md-12 mb-3',
                         'label' => 'Seleccione un usuario',
                         'queUsuariosCargar'=>'todos',
-                        'modulo' => 'familiar-secundario'    
+                        'modulo' => 'familiar-secundario'
                       ])
                     </div>
-                  </div>   
-                   
+                  </div>
+
                   <!--/ Familiar principal -->
                     <div class="col-lg-12 col-md-12  col-sm-12  mt-3">
                         <div class="mb-3">
@@ -214,7 +220,7 @@ $configData = Helper::appClasses();
                                   </select>
                       </div>
                     </div>
-                  
+
                     @if(isset($userId))
                     <input id="parientePrincipal" name="parientePrincipal" class="d-none" value="{{$userId}}">
                     @endif
@@ -230,13 +236,13 @@ $configData = Helper::appClasses();
 
        </form>
     </div>
-    @endif   
+    @endif
     @livewire('Familias.actualizar-pariente')
 
     <form id="eliminarRelacion" method="POST" action="">
       @csrf
     </form>
-  
+
 </div>
 
 

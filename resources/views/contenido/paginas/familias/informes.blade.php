@@ -8,22 +8,26 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/css/pages/page-profile.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/bootstrap-select/bootstrap-select.css')}}" />
+@vite([
+'resources/assets/vendor/scss/pages/page-profile.scss',
+'resources/assets/vendor/libs/select2/select2.scss',
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+'resources/assets/vendor/libs/bootstrap-select/bootstrap-select.scss',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/bootstrap-select/bootstrap-select.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+'resources/assets/vendor/libs/bootstrap-select/bootstrap-select.js',
+])
 @endsection
 
 @section('page-script')
-<script>
+<script type="module">
 
 $(document).ready(function() {
     $('.select2').select2({
@@ -48,12 +52,12 @@ $(document).ready(function() {
   });
 
   $(".clearAllItems").click(function() {
-    value = $(this).data('select');
+   var value = $(this).data('select');
     $('#' + value).val(null).trigger('change');
   });
 
   $(".selectAllItems").click(function() {
-    value = $(this).data('select');
+   var value = $(this).data('select');
     $("#" + value + " > option").prop("selected", true);
     $("#" + value).trigger("change");
   });
@@ -73,7 +77,7 @@ $(document).ready(function() {
       <!-- Familiar principal -->
       <div class="col-lg-3 col-md-6 col-xs-12">
         <div class=" mb-4">
-            
+
             <div style="margin-top:20px" class="card-body pb-20">
               @livewire('Usuarios.usuarios-para-busqueda', [
                 'id' => 'buscador_usuario',
@@ -115,7 +119,7 @@ $(document).ready(function() {
       <!-- Por tipo ministerio -->
       <div class="col-lg-2 col-md-6 mb-3">
         <div class="mb-4">
-        
+
           <div class="card-body ">
             <select style="margin-top:20px" id="filtroTipoMinisterio" name="filtroTipoMinisterio" class="select2BusquedaAvanzada form-select">
                 <option value="0" {{ !$tipoMinisterioSeleccionado || $tipoMinisterioSeleccionado == 0 ? 'selected' : '' }}>Ministerio completo</option>
@@ -278,7 +282,7 @@ $(document).ready(function() {
 
             <!-- Información petición-->
             <div class="col-12 mb-3">
-              <label for="camposRelacionesUsuarios" class="form-label">Información campos relación familiar 
+              <label for="camposRelacionesUsuarios" class="form-label">Información campos relación familiar
                 (<a href="javascript:;" data-select="camposRelacionesUsuarios" class="selectAllItems"><span class="fw-medium">Seleccionar todos</span></a> | <a href="javascript:;" data-select="camposRelacionesUsuarios" class="clearAllItems"><span class="fw-medium">Quitar todos</span></a>)
               </label>
               <select id="camposRelacionesUsuarios" name="camposRelacionesUsuarios[]" class="select2GeneradorExcel form-select" multiple>

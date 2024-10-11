@@ -59,6 +59,7 @@ export default defineConfig({
     laravel({
       input: [
         'resources/css/app.css',
+        'resources/assets/css/redil.css',
         'resources/assets/css/demo.css',
         'resources/js/app.js',
         ...pageJsFilesCustom,
