@@ -14,6 +14,7 @@ return new class extends Migration {
       $table->id();
       $table->string('nombre', 50);
       $table->string('descripcion', 200)->nullable();
+      $table->integer('seccion_paso_crecimiento_id');
       $table->timestamps();
     });
   }

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\DefaultMail;
 use App\Models\ServidorGrupo;
 use App\Models\TipoServicioGrupo;
-
+use App\Models\TipoUsuario;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -238,6 +238,43 @@ class UsuariosParaBusqueda extends Component
               // lo asigno al grupo
               $user->cambiarGrupo($this->grupo->id);
 
+              $tipoGrupo = $this->grupo->tipoGrupo;
+              //automatizacion
+              $automatizacionTipoUsuarios = [];
+
+              if($tipoGrupo->automatizacion_tipo_usuario_id)
+              $automatizacionTipoUsuarios[] = $tipoGrupo->automatizacion_tipo_usuario_id;
+
+              $tipoUsuarioAutomatico = TipoUsuario::whereIn('id', $automatizacionTipoUsuarios)->orderBy('puntaje', 'DESC')->first();
+              $tipoUsuarioActual = TipoUsuario::find($user->tipo_usuario_id);
+
+              if($tipoUsuarioAutomatico && $tipoUsuarioAutomatico->puntaje > $tipoUsuarioActual->puntaje)
+              {
+                $user->tipo_usuario_id = $tipoUsuarioAutomatico->id;
+                $user->save();
+
+                //Además, le cambio a la usuario el rol dependiente
+                $rolDependiente = $user
+                  ->roles()
+                  ->wherePivot('dependiente', '=', true)
+                  ->first();
+
+                  $user->informacion_opcional = $tipoUsuarioAutomatico->id_rol_dependiente.'!='. $rolDependiente->id;
+                  $user->save();
+
+                if ($rolDependiente && $tipoUsuarioAutomatico->id_rol_dependiente != $rolDependiente->id) {
+
+                  $user->informacion_opcional = 'si estoy  entrando';
+                  $user->save();
+
+                  $user->roles()->attach($tipoUsuarioAutomatico->id_rol_dependiente, ['dependiente' => 'true', 'activo' => $rolDependiente->pivot->activo, 'model_type' => 'App\Models\User']);
+                  $user->removeRole($rolDependiente);
+                }
+              }
+
+              //fin automatizacion
+
+
               // creo la bitacora por defecto
               if ($this->tieneInformeDeVinculacion) {
 
@@ -258,7 +295,7 @@ class UsuariosParaBusqueda extends Component
                 // Abro el modal si tiene el privilegio
                 if ($this->rolActivo->hasPermissionTo('grupos.mostar_modal_informe_asignacion_de_asistentes')) {
                   $this->informeId = $informe->id;
-                  $this->resetErrorBag(); // Establece los mensajes de error en la validacion
+                  $this->resetErrorBag(); // Restablece los mensajes de error en la validacion
                   $this->dispatch('abrirModal', nombreModal: 'modalInformeAsignacion');
                 }elseif( count( $this->gruposDondeAsisteActualmente ) > 0){
                   $this->modalUserId = $user->id;

@@ -18,10 +18,7 @@ return new class extends Migration {
       $table->boolean('seguimiento_actividad')->nullable();
       $table->boolean('contiene_servidores')->nullable();
       $table->boolean('posible_grupo_sede')->default(0);
-      $table
-        ->integer('metros_cobertura')
-        ->nullable()
-        ->default(500);
+      $table->integer('metros_cobertura')->nullable()->default(500);
       $table->boolean('ingresos_individuales_discipulos')->default(1);
       $table->boolean('ingresos_individuales_lideres')->default(1);
       $table->boolean('registra_datos_planeacion')->default(0);
@@ -35,14 +32,9 @@ return new class extends Migration {
       $table->boolean('enviar_mensaje_bienvenida')->default(0);
       $table->text('mensaje_bienvenida')->nullable();
       $table->smallinteger('orden')->nullable();
-      $table
-        ->smallinteger('tiempo_para_definir_inactivo_grupo')
-        ->nullable()
-        ->default(30);
-      $table
-        ->boolean('inasistencia_obligatoria')
-        ->nullable()
-        ->default(1);
+      $table->smallinteger('tiempo_para_definir_inactivo_grupo')->nullable()->default(30);
+      $table->boolean('inasistencia_obligatoria')->nullable()->default(1);
+      $table->smallinteger('automatizacion_tipo_usuario_id')->nullable(); // Este campo sirve para cambiar de manera automatica el tipo de usuario indicado aquí cuando se agrege a un grupo que tenga este tipo de grupo.
     });
   }
 

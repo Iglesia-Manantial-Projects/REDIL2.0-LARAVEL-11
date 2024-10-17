@@ -25,12 +25,10 @@ class ActividadController extends Controller
     public function crear()
     {
         $configuracion=Configuracion::find(1);
-
-        return $configuracion;
         return view('contenido.paginas.actividades.nueva',[
-
+      
             'configuracion'=>$configuracion,
-
+          
             ]);
     }
 }

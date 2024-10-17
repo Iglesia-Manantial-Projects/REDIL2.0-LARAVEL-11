@@ -7,38 +7,66 @@ $configData = Helper::appClasses();
 @section('title', 'Grupos')
 
 <!-- Page -->
-
-<!-- Vendor Styles -->
-@section('vendor-style')
-@vite([
-  'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
-  'resources/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.scss',
-  'resources/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.scss',
-  'resources/assets/vendor/libs/jquery-timepicker/jquery-timepicker.scss',
-  'resources/assets/vendor/libs/pickr/pickr-themes.scss',
-  'resources/assets/vendor/libs/select2/select2.scss',
-])
+@section('page-style')
+<link rel="stylesheet" href="{{asset('assets/vendor/css/pages/page-profile.css')}}" />
+<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
+<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
 @endsection
 
-<!-- Vendor Scripts -->
 @section('vendor-script')
-@vite([
-  'resources/assets/vendor/libs/moment/moment.js',
-  'resources/assets/vendor/libs/flatpickr/flatpickr.js',
-  'resources/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js',
-  'resources/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js',
-  'resources/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js',
-  'resources/assets/vendor/libs/pickr/pickr.js',
-  'resources/assets/vendor/libs/select2/select2.js',
-])
+<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
+<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
 @endsection
 
-<!-- Page Scripts -->
 @section('page-script')
-@vite(['resources/assets/js/prueba.js'])
+<script type="text/javascript">
 
+  $(".fecha-picker").flatpickr({
+    dateFormat: "Y-m-d"
+  });
+
+  $(".hora-picker").flatpickr({
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+  });
+
+  $(document).ready(function() {
+    $('.select2').select2({
+      width: '100px',
+      allowClear: true,
+      placeholder: 'Ninguno'
+    });
+  });
+</script>
+
+
+<script type="text/javascript">
+  function sinComillas(e) {
+    tecla = (document.all) ? e.keyCode : e.which;
+    patron =/[\x5C'"]/;
+    te = String.fromCharCode(tecla);
+    return !patron.test(te);
+  }
+</script>
+
+<script type="text/javascript">
+  $('#formulario').submit(function(){
+    $('.btnGuardar').attr('disabled','disabled');
+
+    Swal.fire({
+      title: "Espera un momento",
+      text: "Ya estamos guardando...",
+      icon: "info",
+      showCancelButton: false,
+      showConfirmButton: false,
+      showDenyButton: false
+    });
+  });
+</script>
 @endsection
-
 
 @section('content')
 <h4 class="mb-1">Nuevo grupo</h4>
@@ -52,7 +80,7 @@ $configData = Helper::appClasses();
   <!-- botonera -->
   <div class="d-flex mb-1 mt-5">
     <div class="me-auto">
-      <button class="btn btn-primary me-1 btnGuardar">Guardar</button>
+      <button type="submit" class="btn btn-primary me-1 btnGuardar">Guardar</button>
       <button type="reset" class="btn btn-label-secondary">Cancelar</button>
     </div>
     <div class="p-2 bd-highlight">
@@ -309,7 +337,7 @@ $configData = Helper::appClasses();
   <!-- botonera -->
   <div class="d-flex mb-1 mt-5">
     <div class="me-auto">
-      <button  class="btn btn-primary me-1 btnGuardar">Guardar</button>
+      <button type="submit" class="btn btn-primary me-1 btnGuardar">Guardar</button>
       <button type="reset" class="btn btn-label-secondary">Cancelar</button>
     </div>
     <div class="p-2 bd-highlight">

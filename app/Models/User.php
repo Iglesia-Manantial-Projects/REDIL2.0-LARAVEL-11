@@ -219,6 +219,7 @@ class User extends Authenticatable
       ->leftJoin('encargados_grupo', 'grupos.id', '=', 'encargados_grupo.grupo_id')
       ->leftJoin('users AS encargados', 'encargados_grupo.user_id', '=', 'encargados.id')
       ->leftJoin('tipo_usuarios', 'encargados.tipo_usuario_id', '=', 'tipo_usuarios.id')
+      ->whereNotNull('encargados.id')
       ->selectRaw(
         "encargados.id, CONCAT(encargados.primer_nombre, ' ',encargados.primer_apellido) as nombre, encargados.primer_nombre, encargados.primer_apellido, encargados.segundo_nombre, encargados.segundo_apellido, foto,
         tipo_usuarios.nombre as tipo_usuario, tipo_usuarios.color, tipo_usuarios.icono"

@@ -307,7 +307,7 @@ class SedeController extends Controller
   {
     $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
     $configuracion = Configuracion::find(1);
-    $meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    $meses = Helpers::meses('corto');
 
     $grupoPrincipal = $sede->grupo;
 

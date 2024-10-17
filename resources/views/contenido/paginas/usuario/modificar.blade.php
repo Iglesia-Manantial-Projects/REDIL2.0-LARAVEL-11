@@ -1260,9 +1260,7 @@ $configData = Helper::appClasses();
             <select id="{{$campo->class_id}}" name="{{$campo->class_id}}" class="form-control">
               <option value="">Ninguno</option>
               @foreach (json_decode($campo->opciones_select) as $opcion)
-
               <option value="{{$opcion->value}}" {{ old($campo->class_id, $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first() ? $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()->pivot->valor : '' ) == $opcion->value ? 'selected' : '' }}> {{ ucwords($opcion->nombre) }} </option>
-
               @endforeach
             </select>
             @endif
@@ -1272,18 +1270,12 @@ $configData = Helper::appClasses();
             @if($campo->tipo_de_campo == 4 && $campo->pivot->visible)
             <select id="{{$campo->class_id}}" name="{{$campo->class_id}}[]" multiple class="select2 form-control">
               @foreach (json_decode($campo->opciones_select) as $opcion)
-
-              <option value="{{$opcion->value}}"
-
-                          {{ in_array($opcion->value, old( $campo->class_id,
-                              $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first() &&  $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()->valor
+              <option value="{{$opcion->value}}" {{ in_array($opcion->value, old( $campo->class_id,
+                              $usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()
                               ? json_decode($usuario->camposExtras()->where('campos_extra.id', $campo->id)->first()->pivot->valor)
                               : [] )
                             )
-                          ? "selected" : "" }}
-
-                  > {{ ucwords($opcion->nombre) }} </option>
-
+                          ? "selected" : "" }}> {{ ucwords($opcion->nombre) }} </option>
               @endforeach
             </select>
             @endif

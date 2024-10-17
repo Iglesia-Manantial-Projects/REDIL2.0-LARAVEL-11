@@ -16,7 +16,7 @@ class AutomatizacionPasoCrecimientoSeeder extends Seeder
     AutomatizacionPasoCrecimiento::create([
       'paso_crecimiento_id' => 4, //re-encuentro
       'estado_paso_crecimiento' => 3, // finalizado
-      'tipo_usuario_a_modificar' => 2 // lider
+      'tipo_usuario_a_modificar' => 1 // Pastor
     ]);
   }
 }

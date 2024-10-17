@@ -23,7 +23,8 @@ class TipoGrupoSeeder extends Seeder
       'enviar_mensaje_bienvenida' => 1,
       'mensaje_bienvenida' => 'Ahora ya eres un líder, que bendición que puedas servir al señor desde los grupos abiertos',
       'metros_cobertura' => 5000,
-      'color' => '#c12'
+      'color' => '#c12',
+      'automatizacion_tipo_usuario_id' => 2
     ]);
 
     TipoGrupo::create([

@@ -11,7 +11,6 @@ use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TemaController;
 use App\Http\Controllers\ParienteUsuarioController;
 use App\Http\Controllers\ActividadController;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -36,7 +35,8 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
   return view('contenido.paginas.dashboard');
-})->middleware(['auth', 'verified'])
+})
+  ->middleware(['auth', 'verified'])
   ->name('dashboard');
 
 Route::get('/pagina-no-encontrada', function () {
@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
   Route::get('/usuario/{usuario}/perfil', [UserController::class, 'perfil'])->name('usuario.perfil');
   Route::get('/usuario/{usuario}/descargar-codigo-qr', [UserController::class, 'descargarCodigoQr'])->name('usuario.descargarCodigoQr');
   Route::get('/usuario/{formulario}/{usuario}/modificar', [UserController::class, 'modificar'])->name('usuario.modificar');
-  Route::get('/usuario/{formulario?}/{usuario}/informacion-congregacional', [UserController::class,'informacionCongregacional',])->name('usuario.informacionCongregacional');
+  Route::get('/usuario/{formulario?}/{usuario}/informacion-congregacional/{tipoUsuarioSugerido?}', [UserController::class,'informacionCongregacional',])->name('usuario.informacionCongregacional');
   Route::get('/usuario/{formulario?}/{usuario}/geo-asignacion', [UserController::class, 'geoAsignacion'])->name('usuario.geoAsignacion');
 
   Route::post('/usuarios/excel', [UserController::class, 'listadoFinalCsv'])->name('usuario.listadoFinalCsv');
@@ -126,19 +126,19 @@ Route::middleware('auth')->group(function () {
   Route::get('/familias/informes', [ParienteUsuarioController::class, 'informes'])->name('familias.informes');
   Route::post('/familias/{pariente}/eliminar', [ParienteUsuarioController::class, 'eliminar'])->name('familias.eliminar');
   Route::post('/familias/generar-excel', [ParienteUsuarioController::class, 'generarExcel'])->name('familias.generarExcel');
-  
+
   // actividades
   Route::get('/actividades/crear', [ActividadController::class, 'crear'])->name('actividades.crear');
 
 
   //Route::get('/', [HomePage::class, 'index'])->name('pages-home');
-  //Route::get('/page-2', [Page2::class, 'index'])->name('pages-page-2');
+  Route::get('/page-2', [Page2::class, 'index'])->name('pages-page-2');
 
   // pages
   Route::get('/pages/misc-error', [MiscError::class, 'index'])->name('pages-misc-error');
 
   // authentication
- Route::get('/auth/login-basic', [LoginBasic::class, 'index'])->name('auth-login-basic');
+  Route::get('/auth/login-basic', [LoginBasic::class, 'index'])->name('auth-login-basic');
   Route::get('/auth/register-basic', [RegisterBasic::class, 'index'])->name('auth-register-basic');
 
   // roles y privilegios

@@ -295,9 +295,10 @@ $configData = Helper::appClasses();
 
   <div class="row my-3">
     @if($grupos)
+    <p> {{$grupos->lastItem()}} <b>de</b> {{$grupos->total()}} <b>grupos - Página</b> {{ $grupos->currentPage() }} </p>
     {!! $grupos->appends(request()->input())->links() !!}
     @endif
-  </div>
+    </div>
 
   @livewire('Grupos.modal-baja-alta-grupo')
 

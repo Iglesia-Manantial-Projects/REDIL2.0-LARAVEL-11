@@ -4,7 +4,7 @@
     {{ $label }}
 
   </label>
-  <div wire:click.outside="ocultarListaBusqueda()" class="{{ $verInputBusqueda ? '' : 'd-none'}}">
+  <div wire:mouseenter="ocultarListaBusqueda()" class="{{ $verInputBusqueda ? '' : 'd-none'}}">
     <div class="input-group input-group-merge">
       <span class="input-group-text" id="basic-addon-search31"><i class="ti ti-search"></i></span>
       <input wire:model.live.debounce.30ms="busqueda" wire:click="desplegarListaBusqueda" wire:keydown="resetCantidadGruposCargados" type="text" class="form-control" placeholder="Buscar grupo" aria-label="Buscar grupo" aria-describedby="basic-addon-search31" spellcheck="false" data-ms-editor="true">
@@ -65,7 +65,7 @@
     <div class="dropdown-item w-100 mx-0 d-flex p-2 border  flex-grow-1">
       <div class="flex-fill d-flex align-items-center">
         <div class="d-flex align-items-center justify-content-center rounded me-3" style="background-color: {{$grupoSel->tipoGrupo->color }}">
-          <i class="ti ti-users-group" style="font-size: 4.0rem !important"></i>
+          <i class="ti ti-users-group text-white" style="font-size: 4.0rem !important"></i>
         </div>
         <div class="flex-grow-1 me-2">
           <p class="fs-5 text-wrap m-0">{{ $grupoSel->nombre }}</p>
@@ -89,7 +89,7 @@
       <div class="col-12">
         @if($estiloSeleccion)
           @if($estiloSeleccion == 'pequeno')
-          <div class="dropdown-item w-100 m-0 d-flex p-1 border flex-grow-1"">
+          <div class="dropdown-item w-100 m-0 d-flex p-1 border flex-grow-1">
             <div class="flex-fill d-flex align-items-center">
               <div class="d-flex align-items-center justify-content-center rounded me-3" style="background-color: {{$grupoSeleccionado->tipoGrupo->color }}">
                 <i class="ti ti-users-group text-white" style="font-size: 1.6rem !important"></i>

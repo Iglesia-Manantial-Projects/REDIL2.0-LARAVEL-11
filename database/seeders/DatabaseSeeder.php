@@ -68,5 +68,7 @@ class DatabaseSeeder extends Seeder
     $this->call(CampoExtraGrupoSeeder::class);
     $this->call(ReporteGrupoBajaAltaSeeder::class);
     $this->call(TemaCategoriaSeeder::class);
+    $this->call(SeccionPasoCrecimientoSeeder::class);
+
   }
 }

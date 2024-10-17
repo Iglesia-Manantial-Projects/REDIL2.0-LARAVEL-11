@@ -310,6 +310,27 @@ class RoleSeeder extends Seeder
 
     $usuario11->roles()->attach($oveja->id, ['activo' => 1, 'dependiente' => 1, 'model_type' => 'App\Models\User']);
 
+    // Rol administrador para los design de manantial
+    $usuario12 = \App\Models\User::create([
+      'pais_id' => 45,
+      'email' => 'design@redil.com',
+      'password' => bcrypt('12345678'),
+      'activo' => 0,
+      'asistente_id' => 100,
+      'primer_nombre' => 'Design',
+      'primer_apellido' => 'Admin',
+      'genero' => 0,
+      'identificacion' => '111222365633',
+      'tipo_usuario_id' => 6,
+      'foto' => 'default-m.png',
+      'fecha_nacimiento' => '2000-08-05',
+      'esta_aprobado' => 1,
+      'tipo_vinculacion_id' => 4,
+    ]);
+
+    $usuario12->roles()->attach($superAdmin->id, ['activo' => 1, 'dependiente' => 0, 'model_type' => 'App\Models\User']);
+
+
     // RolNuevo
     $oveja = Role::create(['name' => 'Nuevo', 'icono' => 'ti ti-paper-bag', 'dependiente' => true]);
 
@@ -321,6 +342,7 @@ class RoleSeeder extends Seeder
 
     // RolPDP
     $oveja = Role::create(['name' => 'PDP', 'icono' => 'ti ti-paperclip', 'dependiente' => false]);
+
 
     // Personas
     Permission::create([
@@ -401,7 +423,7 @@ class RoleSeeder extends Seeder
       'titulo' => 'pestana_informacion_congregacional',
       'descripcion' => '',
       'name' => 'personas.pestana_informacion_congregacional',
-    ])->syncRoles([$superAdmin]);
+    ])->syncRoles([$superAdmin,$lider]);
 
     Permission::create([
       'titulo' => 'pestana_geoasignacion',
@@ -419,7 +441,7 @@ class RoleSeeder extends Seeder
       'titulo' => 'panel_procesos_asistente',
       'descripcion' => '',
       'name' => 'personas.panel_procesos_asistente',
-    ])->syncRoles([$superAdmin]);
+    ])->syncRoles([$superAdmin,$lider]);
 
     Permission::create([
       'titulo' => 'panel_asignar_grupo_al_asistente',
@@ -455,7 +477,7 @@ class RoleSeeder extends Seeder
       'titulo' => 'opcion_modificar_informacion_congregacional',
       'descripcion' => '',
       'name' => 'personas.opcion_modificar_informacion_congregacional',
-    ])->syncRoles([$superAdmin]);
+    ])->syncRoles([$superAdmin,$lider]);
 
     Permission::create([
       'titulo' => 'autogestion_pestana_informacion_congregacional',
@@ -515,12 +537,18 @@ class RoleSeeder extends Seeder
       'titulo' => 'editar_procesos_asistente',
       'descripcion' => '',
       'name' => 'personas.editar_procesos_asistente',
-    ])->syncRoles([$superAdmin]);
+    ])->syncRoles([$superAdmin,$lider]);
 
     Permission::create([
       'titulo' => 'eliminar_asistentes_forzadamente',
       'descripcion' => '',
       'name' => 'personas.eliminar_asistentes_forzadamente',
+    ])->syncRoles([$superAdmin]);
+
+    Permission::create([
+      'titulo' => 'privilegio_gestionar_todos_los_pasos_de_crecimiento',
+      'descripcion' => '',
+      'name' => 'personas.privilegio_gestionar_todos_los_pasos_de_crecimiento',
     ])->syncRoles([$superAdmin]);
 
     /*Permission::create([
@@ -1683,13 +1711,13 @@ class RoleSeeder extends Seeder
       'titulo' => 'subitem_panel_peticiones',
       'descripcion' => '',
       'name' => 'peticiones.subitem_panel_peticiones',
-    ]);
+    ])->syncRoles([$superAdmin, $lider]);
 
     Permission::create([
       'titulo' => 'subitem_gestionar_peticiones',
       'descripcion' => '',
       'name' => 'peticiones.subitem_gestionar_peticiones',
-    ])->syncRoles([$superAdmin]);
+    ])->syncRoles([$superAdmin, $lider]);
 
     Permission::create([
       'titulo' => 'lista_peticiones_todas',
@@ -1701,7 +1729,7 @@ class RoleSeeder extends Seeder
       'titulo' => 'lista_peticiones_solo_ministerio',
       'descripcion' => '',
       'name' => 'peticiones.lista_peticiones_solo_ministerio',
-    ]);
+    ])->syncRoles([$lider]);
 
     Permission::create([
       'titulo' => 'opcion_eliminar',

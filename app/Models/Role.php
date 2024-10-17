@@ -43,4 +43,13 @@ class Role extends SpatieRole
       'tipo_grupo_id'
     )->withPivot('asignar_asistente', 'desvincular_asistente', 'asignar_encargado', 'desvincular_encargado', 'created_at', 'updated_at');
   }
+
+
+  public function pasosCrecimiento(): BelongsToMany
+  {
+    return $this->belongsToMany(PasoCrecimiento::class, 'privilegios_pasos_crecimiento_roles', 'rol_id', 'paso_crecimiento_id')->withPivot(
+      'created_at',
+      'updated_at'
+    );
+  }
 }

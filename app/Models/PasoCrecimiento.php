@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PasoCrecimiento extends Model
 {
@@ -29,4 +30,18 @@ class PasoCrecimiento extends Model
   {
     return $this->hasMany(AutomatizacionPasoCrecimiento::class);
   }
+
+  public function seccion(): BelongsTo
+  {
+    return $this->belongsTo(SeccionPasoCrecimiento::class);
+  }
+
+  public function roles(): BelongsToMany
+  {
+    return $this->belongsToMany(Role::class, 'privilegios_pasos_crecimiento_roles', 'paso_crecimiento_id', 'rol_id')->withPivot(
+      'created_at',
+      'updated_at'
+    );
+  }
+
 }

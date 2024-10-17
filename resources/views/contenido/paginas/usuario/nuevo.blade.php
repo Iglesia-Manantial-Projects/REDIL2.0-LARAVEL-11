@@ -6,6 +6,7 @@ $configData = Helper::appClasses();
 
 @section('title', 'Nuevo usuario')
 
+
 @section('vendor-style')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
@@ -111,97 +112,6 @@ $configData = Helper::appClasses();
 
 </script>
 
-
-<script type="module">
-  $('#identificacion').keyup(function () {
-    clearTimeout($.data(this, 'timer'));
-    if($("#identificacion").val()!='')
-    {
-      @if($configuracion->correo_por_defecto==TRUE && $formulario->visible_email==TRUE)
-      if ($("#email").val() == '')
-      {
-        $("#email").val($("#identificacion").val()+"@cambiaestecorreo.com");
-      }else if($("#email").val().indexOf('cambiaestecorreo.com') != -1)
-      {
-        $("#email").val($("#identificacion").val()+"@cambiaestecorreo.com");
-      }
-      @endif
-    }
-
-
-  });
-</script>
-
-<script  type="module">
-  $(".fecha-picker").flatpickr({
-      dateFormat: "Y-m-d"
-  });
-
-  $(document).ready(function() {
-    $('.select2').select2({
-      width: '100px',
-      allowClear: true,
-      placeholder: 'Ninguno'
-    });
-  });
-
-  window.addEventListener('msn', event => {
-    Swal.fire({
-      title: event.detail.msnTitulo,
-      html: event.detail.msnTexto,
-      icon: event.detail.msnIcono,
-      customClass: {
-        confirmButton: 'btn btn-primary'
-      },
-      buttonsStyling: false
-    });
-  });
-
-  window.addEventListener('bloquedoBtnGuardar', event => {
-    $(".btnGuardar").attr('disabled','disabled');
-  });
-
-  window.addEventListener('desbloquedoBtnGuardar', event => {
-    $(".btnGuardar").removeAttr('disabled');
-  });
-
-  $('#tienesUnaPeticion').change(function() {
-
-if (this.checked) {
-  $("#divSelectTipoPeticion").removeClass("d-none");
-  $("#divDescripcionPeticion").removeClass("d-none");
-  $('#descripcion_peticion').prop("required", true);
-  $('#tipo_peticion').prop("required", true);
-} else {
-  $("#divSelectTipoPeticion").addClass("d-none");
-  $("#divDescripcionPeticion").addClass("d-none");
-
-  $("#descripcion_peticion").val("");
-  $('#descripcion_peticion').removeAttr("required");
-
-  $("#tipo_peticion").val("");
-  $('#tipo_peticion').removeAttr("required");
-}
-});
-</script>
-
-<script type="module">
-  $('#formulario').submit(function(){
-    $('.btnGuardar').attr('disabled','disabled');
-
-    Swal.fire({
-      title: "Espera un momento",
-      text: "Ya estamos guardando...",
-      icon: "info",
-      showCancelButton: false,
-      showConfirmButton: false,
-      showDenyButton: false
-    });
-  });
-</script>
-
-@endsection
-
 @section('content')
 <div class="row {{$formulario->es_formulario_exterior ? 'p-4 m-0' : '' }} ">
   @if($formulario->es_formulario_exterior)
@@ -282,7 +192,7 @@ if (this.checked) {
                       <option  value="{{$tipoIdentificacion->id}}" {{ old('tipo_identificación')==$tipoIdentificacion->id ? 'selected' : '' }}>{{$tipoIdentificacion->nombre}}</option>
                       @endforeach
                   </select>
-                  @if($errors->has('tipo_identificación')) <div class="text-danger form-label">{{ $errors->first('tipo_identificación') }} </div> @enderror
+                  @if($errors->has('tipo_identificación')) <div class="text-danger form-label">{{ $errors->first('tipo_identificación') }}</div> @endif
                 </div>
               @endif
               <!--  Tipo de id  -->
@@ -1267,7 +1177,5 @@ if (this.checked) {
   </div>
   <!--/ modal foto -->
 </div>
-
-
 
 @endsection

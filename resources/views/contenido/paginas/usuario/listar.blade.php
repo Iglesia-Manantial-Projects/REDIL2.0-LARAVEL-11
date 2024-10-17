@@ -23,180 +23,145 @@ $configData = Helper::appClasses();
 'resources/assets/vendor/libs/flatpickr/flatpickr.js',
 ])
 @endsection
-
+<!-- Page -->
 @section('page-script')
-
 <script type="module">
-$(document).ready(function () {
-  $('.select2BusquedaAvanzada').select2({
-    dropdownParent: $('#modalBusquedaAvanzada')
+  $(document).ready(function() {
+    $('.select2BusquedaAvanzada').select2({
+      dropdownParent: $('#modalBusquedaAvanzada')
+    });
   });
-});
 
-// Eso arragle un error en los select2 con el scroll cuando esta dentro de un modal
-$('#modalBusquedaAvanzada').on('scroll', function (event) {
-  $(this)
-    .find('.select2BusquedaAvanzada')
-    .each(function () {
+  // Eso arragle un error en los select2 con el scroll cuando esta dentro de un modal
+  $('#modalBusquedaAvanzada').on('scroll', function(event) {
+    $(this).find(".select2BusquedaAvanzada").each(function() {
       $(this).select2({
         dropdownParent: $(this).parent()
       });
     });
-});
-
-$(document).ready(function () {
-  $('.select2GeneradorExcel').select2({
-    dropdownParent: $('#modalGeneradorExcel')
   });
-});
 
-// Eso arragle un error en los select2 con el scroll cuando esta dentro de un modal
-$('#modalGeneradorExcel').on('scroll', function (event) {
-  $(this)
-    .find('.select2GeneradorExcel')
-    .each(function () {
+  $(document).ready(function() {
+    $('.select2GeneradorExcel').select2({
+      dropdownParent: $('#modalGeneradorExcel')
+    });
+  });
+
+  // Eso arragle un error en los select2 con el scroll cuando esta dentro de un modal
+  $('#modalGeneradorExcel').on('scroll', function(event) {
+    $(this).find(".select2GeneradorExcel").each(function() {
       $(this).select2({
         dropdownParent: $(this).parent()
       });
     });
-});
+  });
 
-$('#filtroFechasPasosCrecimiento1').flatpickr({
-  mode: 'range',
-  dateFormat: 'Y-m-d',
-  defaultDate: [
-    "{{ $parametrosBusqueda->filtroFechaIniPaso1 ? $parametrosBusqueda->filtroFechaIniPaso1 : ''}}",
-    "{{ $parametrosBusqueda->filtroFechaFinPaso1 ? $parametrosBusqueda->filtroFechaFinPaso1 : ''}}"
-  ],
-  locale: {
-    firstDayOfWeek: 1,
-    weekdays: {
-      shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-      longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+  $("#filtroFechasPasosCrecimiento1").flatpickr({
+    mode: "range",
+    dateFormat: "Y-m-d",
+    defaultDate: ["{{ $parametrosBusqueda->filtroFechaIniPaso1 ? $parametrosBusqueda->filtroFechaIniPaso1 : ''}}", "{{ $parametrosBusqueda->filtroFechaFinPaso1 ? $parametrosBusqueda->filtroFechaFinPaso1 : ''}}"],
+    locale: {
+      firstDayOfWeek: 1,
+      weekdays: {
+        shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+      },
+      months: {
+        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
+        longhand: ['Enero', 'Febreo', 'Мarzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+      },
     },
-    months: {
-      shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
-      longhand: [
-        'Enero',
-        'Febreo',
-        'Мarzo',
-        'Abril',
-        'Mayo',
-        'Junio',
-        'Julio',
-        'Agosto',
-        'Septiembre',
-        'Octubre',
-        'Noviembre',
-        'Diciembre'
-      ]
-    }
-  },
-  onChange: function (dates) {
-    if (dates.length == 2) {
-      var _this = this;
-      var dateArr = dates.map(function (date) {
-        return _this.formatDate(date, 'Y-m-d');
-      });
-      $('#filtroFechaIniPaso1').val(dateArr[0]);
-      $('#filtroFechaFinPaso1').val(dateArr[1]);
-      // interact with selected dates here
-    }
-  },
-  onReady: function (dateObj, dateStr, instance) {
-    var $cal = $(instance.calendarContainer);
-    if ($cal.find('.flatpickr-clear').length < 1) {
-      $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
-      $cal.find('.flatpickr-clear').on('click', function () {
-        instance.clear();
-        $('#filtroFechaIniPaso1').val('');
-        $('#filtroFechaFinPaso1').val('');
-        instance.close();
-      });
-    }
-  }
-});
-
-$('#filtroFechasPasosCrecimiento2').flatpickr({
-  mode: 'range',
-  dateFormat: 'Y-m-d',
-  defaultDate: [
-    "{{ $parametrosBusqueda->filtroFechaIniPaso2 ? $parametrosBusqueda->filtroFechaIniPaso2 : ''}}",
-    "{{ $parametrosBusqueda->filtroFechaFinPaso2 ? $parametrosBusqueda->filtroFechaFinPaso2 : ''}}"
-  ],
-  locale: {
-    firstDayOfWeek: 1,
-    weekdays: {
-      shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-      longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+    onChange: function(dates) {
+      if (dates.length == 2) {
+        var _this = this;
+        var dateArr = dates.map(function(date) {
+          return _this.formatDate(date, 'Y-m-d');
+        });
+        $('#filtroFechaIniPaso1').val(dateArr[0]);
+        $('#filtroFechaFinPaso1').val(dateArr[1]);
+        // interact with selected dates here
+      }
     },
-    months: {
-      shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
-      longhand: [
-        'Enero',
-        'Febreo',
-        'Мarzo',
-        'Abril',
-        'Mayo',
-        'Junio',
-        'Julio',
-        'Agosto',
-        'Septiembre',
-        'Octubre',
-        'Noviembre',
-        'Diciembre'
-      ]
+    onReady: function(dateObj, dateStr, instance) {
+      var $cal = $(instance.calendarContainer);
+      if ($cal.find('.flatpickr-clear').length < 1) {
+        $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
+        $cal.find('.flatpickr-clear').on('click', function() {
+          instance.clear();
+          $('#filtroFechaIniPaso1').val('');
+          $('#filtroFechaFinPaso1').val('');
+          instance.close();
+        });
+      }
     }
-  },
-  onChange: function (dates) {
-    if (dates.length == 2) {
-      var _this = this;
-      var dateArr = dates.map(function (date) {
-        return _this.formatDate(date, 'Y-m-d');
-      });
-      $('#filtroFechaIniPaso2').val(dateArr[0]);
-      $('#filtroFechaFinPaso2').val(dateArr[1]);
-      // interact with selected dates here
+  });
+
+  $("#filtroFechasPasosCrecimiento2").flatpickr({
+    mode: "range",
+    dateFormat: "Y-m-d",
+    defaultDate: ["{{ $parametrosBusqueda->filtroFechaIniPaso2 ? $parametrosBusqueda->filtroFechaIniPaso2 : ''}}", "{{ $parametrosBusqueda->filtroFechaFinPaso2 ? $parametrosBusqueda->filtroFechaFinPaso2 : ''}}"],
+    locale: {
+      firstDayOfWeek: 1,
+      weekdays: {
+        shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+      },
+      months: {
+        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
+        longhand: ['Enero', 'Febreo', 'Мarzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+      },
+    },
+    onChange: function(dates) {
+      if (dates.length == 2) {
+        var _this = this;
+        var dateArr = dates.map(function(date) {
+          return _this.formatDate(date, 'Y-m-d');
+        });
+        $('#filtroFechaIniPaso2').val(dateArr[0]);
+        $('#filtroFechaFinPaso2').val(dateArr[1]);
+        // interact with selected dates here
+      }
+    },
+    onReady: function(dateObj, dateStr, instance) {
+      var $cal = $(instance.calendarContainer);
+      if ($cal.find('.flatpickr-clear').length < 1) {
+        $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
+        $cal.find('.flatpickr-clear').on('click', function() {
+          instance.clear();
+          $('#filtroFechaIniPaso2').val('');
+          $('#filtroFechaFinPaso2').val('');
+          instance.close();
+        });
+      }
     }
-  },
-  onReady: function (dateObj, dateStr, instance) {
-    var $cal = $(instance.calendarContainer);
-    if ($cal.find('.flatpickr-clear').length < 1) {
-      $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
-      $cal.find('.flatpickr-clear').on('click', function () {
-        instance.clear();
-        $('#filtroFechaIniPaso2').val('');
-        $('#filtroFechaFinPaso2').val('');
-        instance.close();
-      });
-    }
+  });
+
+  $(".clearAllItems").click(function() {
+    value = $(this).data('select');
+    $('#' + value).val(null).trigger('change');
+  });
+
+  $(".selectAllItems").click(function() {
+    value = $(this).data('select');
+    $("#" + value + " > option").prop("selected", true);
+    $("#" + value).trigger("change");
+  });
+
+  function darBajaAlta(usuarioId, tipo)
+  {
+    Livewire.dispatch('abrirModalBajaAlta', { usuarioId: usuarioId, tipo: tipo });
   }
-});
 
-$('.clearAllItems').click(function () {
- var value = $(this).data('select');
-  $('#' + value)
-    .val(null)
-    .trigger('change');
-});
+  function comprobarSiTieneRegistros(usuarioId)
+  {
+    Livewire.dispatch('comprobarSiTieneRegistros', { usuarioId: usuarioId });
+  }
 
-$('.selectAllItems').click(function () {
- var value = $(this).data('select');
-  $('#' + value + ' > option').prop('selected', true);
-  $('#' + value).trigger('change');
-});
+  function eliminacionForzada(usuarioId)
+  {
+    Livewire.dispatch('confirmarEliminacion', { usuarioId: usuarioId });
+  }
 
-function darBajaAlta(usuarioId, tipo) {
-  Livewire.dispatch('abrirModalBajaAlta', { usuarioId: usuarioId, tipo: tipo });
-}
-
-function comprobarSiTieneRegistros(usuarioId) {
-  Livewire.dispatch('comprobarSiTieneRegistros', { usuarioId: usuarioId });
-}
-
-function eliminacionForzada(usuarioId) {
-  Livewire.dispatch('confirmarEliminacion', { usuarioId: usuarioId });
-}
 
 </script>
 
@@ -245,11 +210,11 @@ function eliminacionForzada(usuarioId) {
           <!--/ Cards with few info -->
         </div>
       </div>
-
+      @foreach( $indicadoresPorTipoUsuario->chunk(6) as $chunk)
       <div class="carousel-item">
         <div class="row">
           <!-- Cards with few info -->
-          @foreach( $indicadoresPorTipoUsuario as $indicador )
+          @foreach( $chunk as $indicador )
           <div class="col-lg-4 col-sm-6 mb-2">
             <a href="{{ route('usuario.lista', $indicador->url) }}">
               <div class="card h-100">
@@ -271,6 +236,7 @@ function eliminacionForzada(usuarioId) {
           <!--/ Cards with few info -->
         </div>
       </div>
+      @endforeach
     </div>
   </div>
 </div>
@@ -299,7 +265,7 @@ function eliminacionForzada(usuarioId) {
     <div class="row g-4 mt-1">
       @foreach($personas as $persona)
       <div class="col-xl-4 col-lg-6 col-md-6">
-        <div style="min-height:420px" class="card border rounded">
+        <div class="card border rounded">
           <div class="card-body text-center">
             <div class="dropdown btn-pinned border rounded p-1">
               <button type="button" class="btn dropdown-toggle hide-arrow p-0" data-bs-toggle="dropdown" aria-expanded="false"><i class="ti ti-dots-vertical text-muted"></i></button>
@@ -339,7 +305,7 @@ function eliminacionForzada(usuarioId) {
                 <li><a class="dropdown-item" href="{{ route('usuario.geoAsignacion', ['formulario' => 0 ,'usuario' => $persona]) }}">Geo asignación</a></li>
                 @endif
 
-                @if($rolActivo->hasPermissionTo('personas.opcion_cambiar_contrasena_asistente'))
+                 @if($rolActivo->hasPermissionTo('personas.opcion_cambiar_contrasena_asistente'))
                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCambioContrasena" onclick="event.preventDefault(); document.getElementById('formCambioContrasena').setAttribute('action', 'usuarios/{{$persona->id}}/cambiar-contrasena');">Cambiar contraseña</a></li>
 
                 <form method="POST" id="cambiarContraseñaDefault_{{$persona->id}}" action="{{ route('usuario.cambiarContrasenaDefault',  ['usuario' => $persona ]) }}">

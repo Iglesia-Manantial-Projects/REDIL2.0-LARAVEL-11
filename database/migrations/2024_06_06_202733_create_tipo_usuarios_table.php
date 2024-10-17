@@ -17,7 +17,6 @@ return new class extends Migration
           $table->string('nombre', 50);
           $table->string('descripcion', 200)->nullable();
           $table->timestamps();
-
           $table->string('color', 10)->nullable();
           $table->string('icono', 50)->nullable();
           $table->string('nombre_plural', 50)->nullable();
@@ -25,18 +24,9 @@ return new class extends Migration
           $table->boolean('tipo_pastor_principal')->default(0);
           $table->string('id_rol_dependiente')->nullable(); // antes id_tipo_usuario_dependiente
           $table->smallInteger('orden')->nullable();
-          $table
-            ->boolean('seguimiento_actividad_grupo')
-            ->nullable()
-            ->default(1);
-          $table
-            ->boolean('seguimiento_actividad_reunion')
-            ->nullable()
-            ->default(1);
-          $table
-            ->smallInteger('puntaje')
-            ->nullable()
-            ->default(0);
+          $table->boolean('seguimiento_actividad_grupo')->nullable()->default(1);
+          $table->boolean('seguimiento_actividad_reunion')->nullable()->default(1);
+          $table->smallInteger('puntaje')->nullable()->default(0);
           $table->boolean('visible')->default(1); // Este campo sirve para ocutar o mostrar a los usuarios que tengan este tipo de usuario en los listados y busquedas de la plataforma
           $table->boolean('default')->default(0); // Este campo sirve para determinar quien tipo usuario por defecto
 

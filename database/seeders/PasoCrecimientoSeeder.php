@@ -14,20 +14,29 @@ class PasoCrecimientoSeeder extends Seeder
    */
   public function run(): void
   {
-    PasoCrecimiento::create([
+    $paso1 = PasoCrecimiento::create([
       'nombre' => 'Ingreso a la iglesia',
+      'seccion_paso_crecimiento_id' => 1
     ]);
 
-    PasoCrecimiento::create([
+    $paso2 = PasoCrecimiento::create([
       'nombre' => 'Bautismo',
+      'seccion_paso_crecimiento_id' => 1
     ]);
 
-    PasoCrecimiento::create([
+    $paso3 = PasoCrecimiento::create([
       'nombre' => 'Encuentro',
+      'seccion_paso_crecimiento_id' => 2
     ]);
 
-    PasoCrecimiento::create([
+    $paso4 = PasoCrecimiento::create([
       'nombre' => 'Re-encuentro',
+      'seccion_paso_crecimiento_id' => 2
     ]);
+
+
+    // Le asigno estos pasos al rol con ID 3
+    $paso1->roles()->attach(3);
+    $paso3->roles()->attach(3);
   }
 }

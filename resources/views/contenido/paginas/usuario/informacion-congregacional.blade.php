@@ -6,22 +6,29 @@ $configData = Helper::appClasses();
 
 @section('title', 'Información congregacional')
 
+
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+'resources/assets/vendor/libs/select2/select2.scss',
+
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+
+])
 @endsection
 
-@section('page-script')
-<script src="{{asset('assets/js/form-basic-inputs.js')}}"></script>
 
-<script>
+@section('page-script')
+
+<script type="module">
   $(document).ready(function() {
     $('.select2').select2({
       width: '100px',
@@ -32,10 +39,28 @@ $configData = Helper::appClasses();
     $(".fecha-picker").flatpickr({
       dateFormat: "Y-m-d"
     });
+
+    @if($tipoUsuarioSugerido)
+
+      Swal.fire({
+        html: "Los cambios se guardaron exitosamente, según la información registrada sugerimos cambiar de tipo usuario <b> {{ $usuario->tipoUsuario->nombre}} </b> a <b> {{ $tipoUsuarioSugerido->nombre}} </b> <br><br> ¿Deseas realizar el cambio?",
+        icon: "info",
+        showCancelButton: true,
+        showConfirmButton: true,
+        showDenyButton: true
+      }).then((result) => {
+      if (result.isConfirmed) {
+        $('.select2').val('{{$tipoUsuarioSugerido->id}}').trigger('change');
+
+        $('#formulario').submit();
+      }
+    })
+    @endif
+
   });
 </script>
 
-<script type="text/javascript">
+<script type="module">
   function sinComillas(e) {
     tecla = (document.all) ? e.keyCode : e.which;
     patron = /[\x5C'"]/;
@@ -44,20 +69,20 @@ $configData = Helper::appClasses();
   }
 </script>
 
-<script>
+<script type="module">
   $('.modificarEstadoProceso').click(function() {
 
-    var estados = <?php echo json_encode($estados); ?>;
+    var estados = <?php echo json_encode($estados);?>;
     let dataEstado = $(this).attr("data-estado");
     let pasoId = $(this).attr("data-id");
 
     $("#fecha_paso_" + pasoId).attr("disabled", false);
     if (dataEstado == 1) {
-      dataEstadoNuevo = 2;
+      var dataEstadoNuevo = 2;
     } else if (dataEstado == 2) {
-      dataEstadoNuevo = 3;
+      var dataEstadoNuevo = 3;
     } else if (dataEstado == 3) {
-      dataEstadoNuevo = 1;
+      var dataEstadoNuevo = 1;
       $("#fecha_paso_" + pasoId).attr("disabled", true);
     }
 
@@ -79,6 +104,21 @@ $configData = Helper::appClasses();
       }
     }
 
+  });
+</script>
+
+<script type="module">
+  $('#formulario').submit(function(){
+    $('.btnGuardar').attr('disabled','disabled');
+
+    Swal.fire({
+      title: "Espera un momento",
+      text: "Ya estamos guardando...",
+      icon: "info",
+      showCancelButton: false,
+      showConfirmButton: false,
+      showDenyButton: false
+    });
   });
 </script>
 
@@ -236,39 +276,43 @@ $configData = Helper::appClasses();
       <!-- Procesos de crecimiento -->
       <div class="card">
         <div class="card-header d-flex justify-content-between">
-          <p class="card-text text-uppercase fw-bold"><i class="ti ti-list-details ms-n1 me-2"></i>Procesos de crecimiento</p>
+          <p class="card-text text-uppercase fw-bold"><i class="ti ti-versions ms-n1 me-2"></i>Procesos de crecimiento</p>
         </div>
         <div class="card-body pb-20">
           <ul class="timeline ms-1 mb-0">
             @if($rolActivo->hasPermissionTo('personas.editar_procesos_asistente'))
-            @foreach ($pasosDeCrecimiento as $paso)
-            <li class="timeline-item timeline-item-transparent ps-4">
-              <span id="icono_paso_{{$paso->id}}" class="timeline-indicator-advanced timeline-indicator-{{ $paso->clase_color }}">
-                <i class="ti ti-square rounded-circle scaleX-n1-rtl"></i>
-              </span>
-              <div class="timeline-event">
-                <div class="timeline-header">
-                  <h6 class="mb-0 ml-1 fw-bold">{{ $paso->nombre }}</h6>
-                  <button type="button" data-id="{{ $paso->id }}" data-estado="{{ $paso->estado_paso}}" class="modificarEstadoProceso btn btn-sm rounded-pill btn-{{ $paso->clase_color }} waves-effect waves-light">{{ $paso->estado_nombre }}</button>
-                </div>
-                <input id="fecha_paso_{{$paso->id}}" name="fecha_paso_{{$paso->id}}" value="{{ $paso->estado_fecha }}" {{ $paso->estado_fecha ? '' : 'disabled'}} placeholder="YYYY-MM-DD" class="mt-2 form-control fecha-picker" type="text" />
-                <input id="estado_paso_{{$paso->id}}" name="estado_paso_{{$paso->id}}" value="{{ $paso->estado_paso}}" class="d-none" />
-                <div class="accordion mt-1" id="accordion{{$paso->id}}">
-                  <div class="card accordion-item">
-                    <h2 class="accordion-header" id="headingOne">
-                      <button type="button" class="accordion-button" data-bs-toggle="collapse" data-bs-target="#accordionPaso{{$paso->id}}" aria-expanded="true" aria-controls="accordionPaso{{$paso->id}}">
-                        Detalle
-                      </button>
-                    </h2>
-                    <div id="accordionPaso{{$paso->id}}" class="accordion-collapse collapse" data-bs-parent="#accordion{{$paso->id}}">
-                      <div class="accordion-body">
-                        <textarea onkeypress="return sinComillas(event)" id="detalle_paso_{{$paso->id}}" name="detalle_paso_{{$paso->id}}" class="form-control" rows="2" maxlength="500" spellcheck="false" data-ms-editor="true" placeholder="">{{ $paso->detalle_paso }}</textarea>
+
+              @foreach($seccionesPasoDeCrecimiento as $seccion)
+                <p class="card-text text-uppercase fw-bold"><i class="ti ti-list-details ms-n1 me-2"></i>{{ $seccion->nombre }}</p>
+                @foreach ($seccion->pasos as $paso)
+                <li class="timeline-item timeline-item-transparent ps-4">
+                  <span id="icono_paso_{{$paso->id}}" class="timeline-indicator-advanced timeline-indicator-{{ $paso->clase_color }}">
+                    <i class="ti ti-square rounded-circle scaleX-n1-rtl"></i>
+                  </span>
+                  <div class="timeline-event">
+                    <div class="timeline-header">
+                      <h6 class="mb-0 ml-1 fw-bold">{{ $paso->nombre }}</h6>
+                      <button type="button" data-id="{{ $paso->id }}" data-estado="{{ $paso->estado_paso}}" class="modificarEstadoProceso btn btn-sm rounded-pill btn-{{ $paso->clase_color }} waves-effect waves-light">{{ $paso->estado_nombre }}</button>
+                    </div>
+                    <input id="fecha_paso_{{$paso->id}}" name="fecha_paso_{{$paso->id}}" value="{{ $paso->estado_fecha }}"  placeholder="YYYY-MM-DD" class="mt-2 form-control fecha-picker" type="text" {{ $paso->estado_paso != 1 ? '' : 'disabled'}} />
+                    <input id="estado_paso_{{$paso->id}}" name="estado_paso_{{$paso->id}}" value="{{ $paso->estado_paso}}" class="d-none" />
+                    <div class="accordion mt-1" id="accordion{{$paso->id}}">
+                      <div class="card accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                          <button type="button" class="accordion-button" data-bs-toggle="collapse" data-bs-target="#accordionPaso{{$paso->id}}" aria-expanded="true" aria-controls="accordionPaso{{$paso->id}}">
+                            Detalle
+                          </button>
+                        </h2>
+                        <div id="accordionPaso{{$paso->id}}" class="accordion-collapse collapse" data-bs-parent="#accordion{{$paso->id}}">
+                          <div class="accordion-body">
+                            <textarea onkeypress="return sinComillas(event)" id="detalle_paso_{{$paso->id}}" name="detalle_paso_{{$paso->id}}" class="form-control" rows="2" maxlength="500" spellcheck="false" data-ms-editor="true" placeholder="">{{ $paso->detalle_paso }}</textarea>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-            </li>
-            @endforeach
+                </li>
+                @endforeach
+              @endforeach
             @else
             @foreach ($pasosDeCrecimiento as $paso)
             <li class="timeline-item timeline-item-transparent ps-4">
@@ -357,7 +401,7 @@ $configData = Helper::appClasses();
                   <td class="text-nowrap fw-medium">{{ $rol->name }}</td>
                   <td class="text-center">
                     <label class="switch switch-lg">
-                      <input id="rolDependiente{{$rol->id}}" name="rolDependiente{{$rol->id}}" type="checkbox" class="switch-input" />
+                      <input id="rolIndependiente{{$rol->id}}" name="rolIndependiente{{$rol->id}}" @if($rol->tiene=="si") checked @endif type="checkbox" class="switch-input" />
                       <span class="switch-toggle-slider">
                         <span class="switch-on">Si</span>
                         <span class="switch-off">No</span>

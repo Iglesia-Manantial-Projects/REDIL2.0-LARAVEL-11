@@ -11,6 +11,7 @@ return new class extends Migration
    */
   public function up(): void
   {
+    // Tabla para automatizar los pasos de crecimiento segun el tipo de usuario asignado a la persona
     Schema::create('automatizaciones_paso_crecimiento', function (Blueprint $table) {
       $table->id();
       $table->timestamps();

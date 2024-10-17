@@ -43,6 +43,7 @@ use App\Models\Role;
 use App\Models\ServidorGrupo;
 use App\Models\TipoGrupo;
 use App\Models\TipoPeticion;
+use App\Models\SeccionPasoCrecimiento;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
@@ -60,7 +61,7 @@ use Symfony\Component\Console\Input\Input;
 
 class UserController extends Controller
 {
-  public function listar(Request $request, $tipo = 'todos'): View
+  public function listar(Request $request, $tipo = 'todos')//: View
   {
     $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
 
@@ -255,6 +256,7 @@ class UserController extends Controller
       $indicadoresGenerales[] = $item;
 
       foreach ($tiposUsuarios as $tipoUsuario) {
+
         $item = new stdClass();
         $item->nombre = $tipoUsuario->nombre;
         $item->url = $tipoUsuario->id;
@@ -266,6 +268,8 @@ class UserController extends Controller
         $item->icono = $tipoUsuario->icono;
         $indicadoresPorTipoUsuario[] = $item;
       }
+
+      $indicadoresPorTipoUsuario = collect($indicadoresPorTipoUsuario);
 
       // filtrado por tipo ejemplo: "Todos o inactivo reunion o por alguno de los tipos de usuario Pastor, lider, oveja etc..."
       $personas = $this->filtroPorTipo($personas, $parametrosBusqueda);
@@ -1353,7 +1357,7 @@ class UserController extends Controller
     $año = Carbon::now()->year;
     $cantidadMeses = 11;
     $fechaBase = Carbon::now()->format('Y-m-d');
-    $meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    $meses = Helpers::meses('corto');
     $dataReportesReunion = [];
     $serieReporesReunion = [];
 
@@ -1521,11 +1525,6 @@ class UserController extends Controller
 
   public function crear(Request $request, FormularioUsuario $formulario)
   {
-
- // $request->validate($validated);
-
-
-
     $configuracion = Configuracion::find(1);
     $rolActivo = null;
 
@@ -1535,7 +1534,7 @@ class UserController extends Controller
     $validacion = [];
 
     //fecha_nacimiento
-   if ($formulario->visible_fecha_nacimiento == true) {
+    if ($formulario->visible_fecha_nacimiento == true) {
       $validarFechaNacimiento = $formulario->obligatorio_fecha_nacimiento ? ['date', 'required'] : ['date', 'nullable'] ;
       $validacion = array_merge($validacion, ['fecha_nacimiento' => $validarFechaNacimiento]);
     }
@@ -1777,7 +1776,6 @@ class UserController extends Controller
       }
     }
 
-
     // Validacion de datos
     $request->validate($validacion);
 
@@ -1829,9 +1827,7 @@ class UserController extends Controller
     $usuario->nombre_acudiente = $request->nombre_del_acudiente;
     $usuario->telefono_acudiente = $request->teléfono_del_acudiente;
 
-
-    if ($usuario->save())
-    {
+    if ($usuario->save()) {
       // Email
       $email = empty($request->email) ? $usuario->id . '@' . 'correopordefecto.com' : mb_strtolower($request->email);
 
@@ -2018,17 +2014,13 @@ class UserController extends Controller
       /// esta sección es para el guardado de los campos extra ($('#ministerio_asociado_principal option:selected').val());
       if ($configuracion->visible_seccion_campos_extra == true) {
         $camposExtraFormulario = $formulario->camposExtras;
-        foreach ($camposExtraFormulario as $campoExtra)
-        {
-          if ($campoExtra->visible == true)
-          {
-            if ($campoExtra->tipo_de_campo != 4)
-            {
+        foreach ($camposExtraFormulario as $campoExtra) {
+          if ($campoExtra->visible == true) {
+            if ($campoExtra->tipo_de_campo != 4) {
               $usuario
                 ->camposExtras()
                 ->attach($campoExtra->id, ['valor' => ucwords(mb_strtolower($request[$campoExtra->class_id]))]);
             } else {
-
               $usuario
                 ->camposExtras()
                 ->attach($campoExtra->id, ['valor' => json_encode($request[$campoExtra->class_id])]);
@@ -2843,8 +2835,14 @@ class UserController extends Controller
     }
   }
 
-  public function informacionCongregacional(?int $formulario = 0, User $usuario)
+  public function informacionCongregacional(?int $formulario = 0, User $usuario, int $tipoUsuarioSugeridoId=0)
   {
+    $tipoUsuarioSugerido = null;
+    if($tipoUsuarioSugeridoId)
+    {
+      $tipoUsuarioSugerido = TipoUsuario::find($tipoUsuarioSugeridoId);
+    }
+
     $configuracion = Configuracion::find(1);
     if (!isset($usuario)) {
       return Redirect::to('pagina-no-encontrada');
@@ -2887,27 +2885,44 @@ class UserController extends Controller
         ->get();
     }
 
-    $pasosDeCrecimiento = PasoCrecimiento::orderBy('updated_at', 'asc')
-      ->select('id', 'nombre')
+    if ($rolActivo->hasPermissionTo('personas.privilegio_gestionar_todos_los_pasos_de_crecimiento'))
+    {
+      $pasosDeCrecimiento = PasoCrecimiento::orderBy('updated_at', 'asc')
+      ->select('id', 'nombre','seccion_paso_crecimiento_id')
       ->get();
-    $pasosDeCrecimiento->map(function ($paso) use ($usuario) {
-      $pasoUsuario = CrecimientoUsuario::where('user_id', $usuario->id)
-        ->where('paso_crecimiento_id', $paso->id)
-        ->first();
-      $paso->clase_color = 'danger';
-      $paso->estado_fecha = null;
-      $paso->estado_paso = 1;
-      $paso->estado_nombre = 'No realizado';
-      $paso->detalle_paso = '';
-      $paso->bandera = 'default';
-      if ($pasoUsuario) {
-        $paso->clase_color = $pasoUsuario->estado->color;
-        $paso->estado_fecha = $pasoUsuario->fecha;
-        $paso->estado_paso = $pasoUsuario->estado_id;
-        $paso->estado_nombre = $pasoUsuario->estado->nombre;
-        $paso->detalle_paso = $pasoUsuario->detalle;
-        $paso->bandera = 'si existe';
-      }
+    }else{
+      $pasosDeCrecimiento =  $rolActivo->pasosCrecimiento()->orderBy('updated_at', 'asc')->get();
+    }
+
+
+    $seccionesIds = $pasosDeCrecimiento->pluck('seccion_paso_crecimiento_id')->toArray();
+    $seccionesPasoDeCrecimiento = SeccionPasoCrecimiento::whereIn('id',$seccionesIds)->orderBy('orden', 'asc')->get();
+
+    $seccionesPasoDeCrecimiento->map(function ($seccion) use ($usuario, $pasosDeCrecimiento) {
+
+      $pasosDeLaSeccion = $pasosDeCrecimiento->where('seccion_paso_crecimiento_id', $seccion->id);
+      $pasosDeLaSeccion->map(function ($paso) use ($usuario) {
+        $pasoUsuario = CrecimientoUsuario::where('user_id', $usuario->id)
+          ->where('paso_crecimiento_id', $paso->id)
+          ->first();
+        $paso->clase_color = 'danger';
+        $paso->estado_fecha = null;
+        $paso->estado_paso = 1;
+        $paso->estado_nombre = 'No realizado';
+        $paso->detalle_paso = '';
+        $paso->bandera = 'default';
+        if ($pasoUsuario) {
+          $paso->clase_color = $pasoUsuario->estado->color;
+          $paso->estado_fecha = $pasoUsuario->fecha;
+          $paso->estado_paso = $pasoUsuario->estado_id;
+          $paso->estado_nombre = $pasoUsuario->estado->nombre;
+          $paso->detalle_paso = $pasoUsuario->detalle;
+          $paso->bandera = 'si existe';
+        }
+      });
+
+      $seccion->pasos = $pasosDeLaSeccion;
+
     });
 
     $rolesNoDependientes = Role::where('dependiente', 'FALSE')
@@ -2925,6 +2940,8 @@ class UserController extends Controller
     $estados = EstadoPasoCrecimientoUsuario::get();
     $gruposDondeAsisteIds = $usuario->gruposDondeAsiste->pluck('id')->toArray();
 
+    //return $tipoUsuarioSugerido;
+
     return view('contenido.paginas.usuario.informacion-congregacional', [
       'formulario' => $formulario,
       'usuario' => $usuario,
@@ -2933,32 +2950,42 @@ class UserController extends Controller
       'configuracion' => $configuracion,
       'rolesNoDependientes' => $rolesNoDependientes,
       'rolActivo' => $rolActivo,
-      'pasosDeCrecimiento' => $pasosDeCrecimiento,
+    //  'pasosDeCrecimiento' => $pasosDeCrecimiento,
       'estados' => $estados,
       'gruposDondeAsisteIds' => $gruposDondeAsisteIds,
+      'tipoUsuarioSugerido' => $tipoUsuarioSugerido,
+      'seccionesPasoDeCrecimiento' => $seccionesPasoDeCrecimiento
     ]);
   }
 
   public function actualizarInformacionCongregacional(Request $request, User $usuario)
   {
 
+    /*return redirect()
+    ->route('usuario.informacionCongregacional', ['formulario' => 0 ,'usuario' => $usuario, 'tipoUsuarioSugerido' => 5])
+    ->with('success', 'La información congregacional <b>' . $usuario->nombre(3) . '</b> se actualizo con éxito.');
+*/
     $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
+    $automatizacionTipoUsuarios = [];
+    $sugerencia = false;
 
     if (!isset($usuario)) {
       return Redirect::to('pagina-no-encontrada');
     }
 
     // Asigno los grupos
-    if ($rolActivo->hasPermissionTo('personas.panel_asignar_grupo_al_asistente')) {
+    if ($rolActivo->hasPermissionTo('personas.panel_asignar_grupo_al_asistente'))
+    {
 
       $idsGrupos = json_decode($request->inputGrupos);
+      $grupos = Grupo::leftJoin('tipo_grupos', 'grupos.tipo_grupo_id', '=', 'tipo_grupos.id')
+      ->whereIn('grupos.id', $idsGrupos)
+      ->select('grupos.id','grupos.nombre','grupos.tipo_grupo_id', 'tipo_grupos.automatizacion_tipo_usuario_id', 'tipo_grupos.nombre as nameTipo')
+      ->get();
+
       //Validar si privilegio_asignar_asistente_todo_tipo_asistente_a_un_grupo
       if(!$rolActivo->hasPermissionTo('grupos.privilegio_asignar_asistente_todo_tipo_asistente_a_un_grupo'))
       {
-        $grupos = Grupo::whereIn('grupos.id', $idsGrupos)
-        ->select('id','nombre','tipo_grupo_id')
-        ->get();
-
         foreach($grupos as $grupo)
         {
           $tipoGrupo=$grupo->tipoGrupo;
@@ -2974,6 +3001,9 @@ class UserController extends Controller
         }
       }
 
+      $gruposActualesIds = $usuario->gruposDondeAsiste()->select('grupos.id')->pluck('grupos.id')->toArray();
+      $gruposNuevos = array_diff($idsGrupos, $gruposActualesIds);
+      $automatizacionTipoUsuarios+= $grupos->whereIn('id',$gruposNuevos)->whereNotNull('automatizacion_tipo_usuario_id')->pluck('automatizacion_tipo_usuario_id')->toArray();
       $usuario->gruposDondeAsiste()->sync($idsGrupos);
 
       //asigno la sede al usuario del ultimo grupo agregado
@@ -3011,41 +3041,8 @@ class UserController extends Controller
       }
     }
 
-    // Asigno tipo usuario
-    if (
-      $rolActivo->hasPermissionTo('personas.panel_tipos_asistente') &&
-      $rolActivo->hasPermissionTo('personas.editar_tipos_asistente')
-    ) {
-      if ($request->tipo_usuario) {
-        $usuario->tipo_usuario_id = $request->tipo_usuario;
-
-        //Además, le cambio a la usuario el rol dependiente
-        $tipoUsuarioNuevo = TipoUsuario::find($usuario->tipo_usuario_id);
-        $rolDependiente = $usuario
-          ->roles()
-          ->wherePivot('dependiente', '=', true)
-          ->first();
-
-        if ($rolDependiente && $tipoUsuarioNuevo->id_rol_dependiente != $rolDependiente->id) {
-          $usuario
-            ->roles()
-            ->wherePivot('dependiente', '=', true)
-            ->detach();
-          $usuario->roles()->attach($tipoUsuarioNuevo->id_rol_dependiente, [
-            'activo' => $rolDependiente->pivot->activo,
-            'dependiente' => true,
-            'model_type' => 'App\Models\User',
-          ]);
-        }
-        $usuario->save();
-      }
-    }
-
     // asigna los procesos de crecimiento
-    if (
-      $rolActivo->hasPermissionTo('personas.panel_procesos_asistente') &&
-      $rolActivo->hasPermissionTo('personas.editar_procesos_asistente')
-    ) {
+    if ($rolActivo->hasPermissionTo('personas.panel_procesos_asistente') && $rolActivo->hasPermissionTo('personas.editar_procesos_asistente')) {
       $pasosCrecimiento = PasoCrecimiento::all();
       $puntaje = 0;
       $idTipoUsuario = null;
@@ -3058,7 +3055,7 @@ class UserController extends Controller
           ->first();
 
         if ($pasoActual) {
-          if ($pasoActual->pivot->estado_id != $request['estado_paso_' . $paso->id]) {
+          if ($pasoActual->pivot->estado_id != $request['estado_paso_' . $paso->id] && $request['estado_paso_' . $paso->id]) {
             $pasoActual->pivot->estado_id = $request['estado_paso_' . $paso->id];
 
             /* Proceso de automatización */
@@ -3066,13 +3063,16 @@ class UserController extends Controller
               ->automatizaciones()
               ->where('estado_paso_crecimiento', $request['estado_paso_' . $paso->id])
               ->first();
+
             if ($autorizacionPasoCrecimiento) {
+              $automatizacionTipoUsuarios[] = $autorizacionPasoCrecimiento->tipo_usuario_a_modificar;
+              /*
               $tipoUsuarioTemporal = TipoUsuario::find($autorizacionPasoCrecimiento->tipo_usuario_a_modificar);
 
               if ($tipoUsuarioTemporal->puntaje > $puntaje) {
                 $puntaje = $tipoUsuarioTemporal->puntaje;
                 $idTipoUsuario = $tipoUsuarioTemporal->id;
-              }
+              }*/
             }
             /* Fin proceso de automatización */
           }
@@ -3082,14 +3082,15 @@ class UserController extends Controller
           } else {
             $pasoActual->pivot->fecha = null;
           }
-          $pasoActual->pivot->detalle = $request['detalle_paso_' . $paso->id];
+          $pasoActual->pivot->detalle = $request['detalle_paso_' . $paso->id] ? $request['detalle_paso_' . $paso->id] : '';
           $pasoActual->pivot->save();
         } else {
           // Si el usuario no tiene el paso, lo creo
-          if ($request['estado_paso_' . $paso->id] == 1) {
+          if ($request['estado_paso_' . $paso->id] == 1 || !$request['estado_paso_' . $paso->id]) {
+
             $usuario->pasosCrecimiento()->attach($paso->id, [
-              'estado_id' => $request['estado_paso_' . $paso->id],
-              'detalle' => $request['detalle_paso_' . $paso->id],
+              'estado_id' => $request['estado_paso_' . $paso->id] ? $request['estado_paso_' . $paso->id] : 1,
+              'detalle' => $request['detalle_paso_' . $paso->id] ? $request['detalle_paso_' . $paso->id] : '',
             ]);
           } else {
             $usuario->pasosCrecimiento()->attach($paso->id, [
@@ -3102,23 +3103,27 @@ class UserController extends Controller
             ->pasosCrecimiento()
             ->where('pasos_crecimiento.id', $paso->id)
             ->first();
+
           /* Proceso de automatización */
           $autorizacionPasoCrecimiento = $pasoActual
             ->automatizaciones()
             ->where('estado_paso_crecimiento', $request['estado_paso_' . $paso->id])
             ->first();
+
           if ($autorizacionPasoCrecimiento) {
-            $tipoUsuarioTemporal = TipoUsuario::find($autorizacionPasoCrecimiento->tipo_usuario_a_modificar);
+            $automatizacionTipoUsuarios[] = $autorizacionPasoCrecimiento->tipo_usuario_a_modificar;
+            /*$tipoUsuarioTemporal = TipoUsuario::find($autorizacionPasoCrecimiento->tipo_usuario_a_modificar);
 
             if ($tipoUsuarioTemporal->puntaje > $puntaje) {
               $puntaje = $tipoUsuarioTemporal->puntaje;
               $idTipoUsuario = $tipoUsuarioTemporal->id;
-            }
+            }*/
           }
           /* Fin proceso de automatización */
         }
       }
 
+      /*
       // Actualizo de manera automatica
       if (isset($idTipoUsuario) && $puntaje > $usuario->tipoUsuario->puntaje) {
         $usuario->tipo_usuario_id = $idTipoUsuario;
@@ -3142,30 +3147,28 @@ class UserController extends Controller
             'model_type' => 'App\Models\User',
           ]);
         }
-      }
+      }*/
     }
 
     // asignar los roles dependientes == false, es decir los independientes
     if ($rolActivo->hasPermissionTo('personas.ver_panel_asignar_tipo_usuario')) {
-      $RolesNoDependientes = Role::orderBy('id', 'asc')
+      $rolesNoDependientes = Role::orderBy('id', 'asc')
         ->where('dependiente', '=', 'FALSE')
         ->get();
 
-      foreach ($RolesNoDependientes as $rol) {
+      foreach ($rolesNoDependientes as $rol) {
         $registros = $usuario
           ->roles()
           ->where('id', $rol->id)
           ->get();
-        if ($registros) {
-          if (!$request['rolDependiente' . 1]) {
-            $usuario
-              ->roles()
-              ->where('id', $rol->id)
-              ->detach();
+
+        if ($registros->count()>0) {
+          if (!$request->get('rolIndependiente'.$rol->id)) {
+            $usuario->removeRole($rol);
           }
         } else {
-          if ($request['rolDependiente' . 1]) {
-            $usuario->roles()->attach($rol->id, ['dependiente' => 'false', 'activo' => 'false']);
+          if ($request->get('rolIndependiente'.$rol->id)) {
+            $usuario->roles()->attach($rol->id, ['dependiente' => 'false', 'activo' => 'false', 'model_type' => 'App\Models\User']);
           }
         }
       }
@@ -3175,7 +3178,7 @@ class UserController extends Controller
         ->wherePivot('activo', '=', true)
         ->count();
       if ($cantidadActivos < 1) {
-        // Con esto nos aseguramos
+        // Con esto nos aseguramosd que tenga minimo un rol dependiente activo
         $rolDependiente = $usuario
           ->roles()
           ->wherePivot('dependiente', '=', true)
@@ -3195,16 +3198,45 @@ class UserController extends Controller
       }
     }
 
+    // Asigno tipo usuario
+    if ($rolActivo->hasPermissionTo('personas.panel_tipos_asistente') && $rolActivo->hasPermissionTo('personas.editar_tipos_asistente'))
+    {
+      if ($request->tipo_usuario) {
+        $usuario->tipo_usuario_id = $request->tipo_usuario;
+        $usuario->save();
+      }
+    }
+
+    $tipoUsuarioAutomatico = TipoUsuario::whereIn('id', $automatizacionTipoUsuarios)->orderBy('puntaje', 'DESC')->first();
+    //return $tipoUsuarioAutomatico;
+    $tipoUsuarioActual = TipoUsuario::find($usuario->tipo_usuario_id);
+
+    if($tipoUsuarioAutomatico && $tipoUsuarioAutomatico->puntaje > $tipoUsuarioActual->puntaje)
+    {
+      $sugerencia = true;
+    }
+
+    //Además, le cambio a la usuario el rol dependiente
+    $rolDependiente = $usuario
+      ->roles()
+      ->wherePivot('dependiente', '=', true)
+      ->first();
+
+    if ($rolDependiente && $tipoUsuarioActual->id_rol_dependiente != $rolDependiente->id) {
+      $usuario->roles()->attach($tipoUsuarioActual->id_rol_dependiente, ['activo' => $rolDependiente->pivot->activo,'dependiente' => true,'model_type' => 'App\Models\User']);
+      $usuario->removeRole($rolDependiente);
+    }
+
     $usuario->save();
 
-    if ($rolActivo->hasPermissionTo('personas.opcion_ver_perfil_asistente')) {
+    if ($sugerencia) {
       return redirect()
-        ->route('usuario.perfil', [$usuario])
-        ->with('success', 'La información congregacional <b>' . $usuario->nombre(3) . '</b> se actualizo con éxito.');
+      ->route('usuario.informacionCongregacional', ['formulario' => 0 ,'usuario' => $usuario, 'tipoUsuarioSugerido' => $tipoUsuarioAutomatico->id])
+      ->with('success', 'La información congregacional <b>' . $usuario->nombre(3) . '</b> se actualizo con éxito.');
     } else {
       return redirect()
-        ->route('usuario.lista')
-        ->with('success', 'La información congregacional <b>' . $usuario->nombre(3) . '</b> se actualizo con éxito.');
+      ->route('usuario.informacionCongregacional', ['formulario' => 0 ,'usuario' => $usuario])
+      ->with('success', 'La información congregacional <b>' . $usuario->nombre(3) . '</b> se actualizo con éxito.');
     }
   }
 

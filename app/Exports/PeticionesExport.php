@@ -83,12 +83,6 @@ class PeticionesExport implements FromView
         $peticiones = $peticiones->whereIn('tipo_peticion_id', $this->parametrosBusqueda->filtroTipoPeticiones);
       }
 
-      // filtro por tipo peticiones
-      if ($this->parametrosBusqueda && isset($this->parametrosBusqueda->filtroPaises))
-      {
-        $peticiones = $peticiones->whereIn('pais_id', $this->parametrosBusqueda->filtroPaises);
-      }
-
       // Busqueda por palabra clave
       if ($this->parametrosBusqueda &&  isset($this->parametrosBusqueda->buscar)) {
         $buscar = htmlspecialchars($this->parametrosBusqueda->buscar);
