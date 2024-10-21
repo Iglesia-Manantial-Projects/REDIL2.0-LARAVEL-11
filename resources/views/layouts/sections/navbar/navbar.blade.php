@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 $containerNav = ($configData['contentLayout'] === 'compact') ? 'container-xxl' : 'container-fluid';
 $navbarDetached = ($navbarDetached ?? '');
+$configuracion = App\Models\Configuracion::find(1);
 @endphp
 
 <!-- Navbar -->
@@ -393,7 +394,7 @@ $navbarDetached = ($navbarDetached ?? '');
           <li class="nav-item navbar-dropdown dropdown-user dropdown">
             <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
               <div class="avatar avatar-online">
-                <img src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}" alt class="rounded-circle">
+                <img src="{{ $configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.Auth::user()->foto) : Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.Auth::user()->foto) }}" alt class="h-auto rounded-circle">
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -402,7 +403,7 @@ $navbarDetached = ($navbarDetached ?? '');
                   <div class="d-flex align-items-center">
                     <div class="flex-shrink-0 me-2">
                       <div class="avatar avatar-online">
-                        <img src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}" alt class="rounded-circle">
+                        <img src="{{ $configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.Auth::user()->foto) : Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.Auth::user()->foto) }}" alt class="rounded-circle">
                       </div>
                     </div>
                     <div class="flex-grow-1">

@@ -9,17 +9,21 @@ $configData = Helper::appClasses();
 
 @section('vendor-style')
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
+  @vite([
+    'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss'
+  ])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
+  @vite([
+    'resources/assets/vendor/libs/sweetalert2/sweetalert2.js'
+  ])
 @endsection
 
 @section('page-script')
-<script src="{{asset('assets/js/app-access-roles.js')}}"></script>
-<script src="{{asset('assets/js/modal-add-role.js')}}"></script>
 
-<script>
+
+<script type="module">
     window.addEventListener('cerrarModal', event => {
       $('#'+event.detail.nombreModal).modal('hide');
     });
@@ -47,7 +51,7 @@ $configData = Helper::appClasses();
     });
 </script>
 
-<script>
+<script type="module">
   Livewire.on('eliminar', rolId => {
 
     Swal.fire({

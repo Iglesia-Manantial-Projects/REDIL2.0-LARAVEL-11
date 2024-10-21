@@ -8,18 +8,22 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
+  @vite([
+    'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+    'resources/assets/vendor/libs/select2/select2.scss',
+  ])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+  @vite([
+    'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+    'resources/assets/vendor/libs/select2/select2.js',
+  ])
 @endsection
 
 @section('page-script')
-<script>
-$(document).ready(function() {
+<script type="module">
+  $(document).ready(function() {
     $('#select2').select2({
       width: '100px',
       allowClear: true,
@@ -28,7 +32,7 @@ $(document).ready(function() {
   });
 </script>
 
-<script type="text/javascript">
+<script type="module">
   function sinComillas(e) {
     tecla = (document.all) ? e.keyCode : e.which;
     patron =/[\x5C'"]/;
@@ -37,7 +41,7 @@ $(document).ready(function() {
   }
 </script>
 
-<script type="text/javascript">
+<script type="module">
   $('#formulario').submit(function(){
     $('.btnGuardar').attr('disabled','disabled');
 
@@ -86,11 +90,12 @@ $(document).ready(function() {
       </div>
       <div class="card-body pb-20 row">
 
-        <div class="mb-3 col-12 col-md-12">
+        <div class="mb-3 col-12 col-md-6">
           @livewire('Usuarios.usuarios-para-busqueda', [
             'id' => 'persona',
             'class' => 'col-12 col-md-12 mb-3',
             'label' => '¿De quién es la petición?',
+            'estiloSeleccion' => 'pequeno',
             'tipoBuscador' => 'unico',
             'queUsuariosCargar' => $queUsuariosCargar,
             'conDadosDeBaja' => 'no',
@@ -101,7 +106,7 @@ $(document).ready(function() {
         </div>
 
         <!-- Tipos de petición -->
-        <div class="mb-3 col-12 col-md-12">
+        <div class="mb-3 col-12 col-md-6">
           <label class="form-label" for="tipo_de_peticion">
             <span class="badge badge-dot bg-info me-1"></span>
             ¿Qué tipo de petición es?

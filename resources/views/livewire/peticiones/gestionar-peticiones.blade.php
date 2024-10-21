@@ -10,6 +10,11 @@
           </div>
           <form wire:submit="addRespuesta" class="row g-3">
 
+           <!-- Create the editor container -->
+            <div wire:ignore>
+              <div id="editor"></div>
+            </div>
+
             <!-- Observacion -->
             <div wire:ignore class="mb-2 col-12 col-md-12">
               <textarea id="editorRespuesta" name="respuesta" class="form-control" rows="2" maxlength="500" spellcheck="false" data-ms-editor="true" placeholder="Detalla aquí la respuesta del la persona."></textarea>
@@ -125,6 +130,19 @@
     </div>
   </div>
   <!--/ Modal buscarBiblia  -->
+
+   <!-- Include stylesheet -->
+   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+
+
+ <!-- Include the Quill library -->
+ <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+ <!-- Initialize Quill editor -->
+ <script>
+
+ </script>
 </div>
 
 @assets
@@ -135,26 +153,10 @@
 @endassets
 
 @script
-<script>
-   tinymce.init({
-    selector: 'textarea#editorRespuesta', // Replace this CSS selector to match the placeholder element for TinyMCE
-    plugins: 'anchor autolink charmap emoticons link lists searchreplace table visualblocks wordcount  ',
-    toolbar: 'undo redo | blocks fontsize | bold italic underline strikethrough emoticons | link table  | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight |',
-    tinycomments_mode: 'embedded',
-    tinycomments_author: 'Editor de respuestas',
-    language: 'es',
-    relative_urls: false,
-    remove_script_host: false,
-    setup: function (editor) {
-      editor.on('init change', function () {
-        editor.save();
-      });
-      editor.on('change', function (e) {
-         $wire.set('respuesta', editor.getContent());
-      });
-  }
-  });
-
+<script >
+   const quill = new Quill('#editor', {
+         theme: 'snow'
+     });
   tinymce.init({
     selector: 'textarea#editorSeguimiento', // Replace this CSS selector to match the placeholder element for TinyMCE
     plugins: 'anchor autolink charmap emoticons link lists searchreplace table visualblocks wordcount  ',

@@ -8,89 +8,93 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/fullcalendar/fullcalendar.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-
-
+  @vite([
+    'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+    'resources/assets/vendor/libs/select2/select2.scss',
+    'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+    'resources/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.scss'
+  ])
 @endsection
 
 @section('vendor-script')
-
-<script src="{{asset('assets/vendor/libs/fullcalendar/fullcalendar.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-
-
-
+  @vite([
+    'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+    'resources/assets/vendor/libs/select2/select2.js',
+    'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+    'resources/assets/vendor/libs/moment/moment.js',
+    'resources/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js'
+  ])
 @endsection
 
 @section('page-script')
+<script type="module">
+    $(function() {
+      //esta bandera impide que entre en un bucle cuando se ejecuta la funcion cb(start, end)
+      let band=0;
+      moment.locale('es');
 
+      function cb(start, end) {
 
-<script>
+        $('#filtroFechaIni').val(start.format('YYYY-MM-DD'));
+        $('#filtroFechaFin').val(end.format('YYYY-MM-DD'));
 
-document.addEventListener('DOMContentLoaded', function() {
-  let calendarEl = document.getElementById('calendar');
-let calendar = new Calendar(calendarEl, {
-  plugins: [dayGridPlugin, interactionPlugin, listPlugin, timegridPlugin],
-  initialView: 'dayGridMonth',
-  headerToolbar: {
-    left: 'prev,next today',
-    center: 'title',
-    right: 'dayGridMonth,timeGridWeek,listWeek'
-  }
-});
-calendar.render();
-});
+        $('#filtroFechas span').html(start.format('YYYY-MM-DD') + ' hasta ' + end.format('YYYY-MM-DD'));
 
-</script>
-
-<script>
-   $("#filtroFechas").flatpickr({
-    mode: "range",
-    dateFormat: "Y-m-d",
-    defaultDate: ["{{ $filtroFechaIni }}", "{{ $filtroFechaFin }}"],
-    locale: {
-      firstDayOfWeek: 1,
-      weekdays: {
-        shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-      },
-      months: {
-        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'],
-        longhand: ['Enero', 'Febreo', 'Мarzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-      },
-    },
-    onChange: function(dates) {
-      if (dates.length == 2) {
-        var _this = this;
-        var dateArr = dates.map(function(date) {
-          return _this.formatDate(date, 'Y-m-d');
-        });
-        $('#filtroFechaIni').val(dateArr[0]);
-        $('#filtroFechaFin').val(dateArr[1]);
-        // interact with selected dates here
+        if(band==1)
+        $("#filtro").submit();
+        band=1;
       }
-    },
-    onReady: function(dateObj, dateStr, instance) {
-      var $cal = $(instance.calendarContainer);
-      if ($cal.find('.flatpickr-clear').length < 1) {
-        $cal.append('<button type="button" class="btn btn-sm btn-outline-primary flatpickr-clear mb-2">Borrar</button>');
-        $cal.find('.flatpickr-clear').on('click', function() {
-          instance.clear();
-          $('#filtroFechaIni').val('');
-          $('#filtroFechaFin').val('');
-          instance.close();
-        });
-      }
-    }
-  });
 
+      //comprobamos si existe la fecha incio y fecha fin y creamos las fechas con el formato aceptado
+      @if(isset($filtroFechaIni))
+        var fecha_ini = moment('{{$filtroFechaIni}}');
+        fecha_ini.format("YYYY-MM-DD");
+      @endif
 
+      @if(isset($filtroFechaFin))
+        var fecha_fin = moment('{{$filtroFechaFin}}');
+        fecha_fin.format("YYYY-MM-DD");
+      @endif
+
+      @if(isset($filtroFechaIni) && isset($filtroFechaFin))
+        cb(fecha_ini, fecha_fin);
+      @else
+        cb(moment().startOf('month'), moment().endOf('month'));
+      @endif
+
+      $('#filtroFechas').daterangepicker({
+          ranges: {
+              'Hoy': [moment(), moment()],
+              'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
+              'Últimos 30 días': [moment().subtract(29, 'days'), moment()],
+              'Mes actual': [moment().startOf('month'), moment().endOf('month')],
+              'Mes anterior': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+              'Año actual': [moment().startOf('year'), moment().endOf('year')],
+              'Año anterior': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')],
+          },
+          "locale": {
+            "format": "YYYY-MM-DD",
+            "separator": " hasta ",
+            "applyLabel": "Aplicar",
+            "cancelLabel": "Cancelar",
+            "fromLabel": "Desde",
+            "toLabel": "Hasta",
+            "customRangeLabel": "Otro rango",
+            "monthNames": JSON.parse(<?php print json_encode(json_encode($meses)); ?>),
+            "firstDay": 1
+          },
+          @if(isset($filtroFechaIni))
+          "startDate": fecha_ini,
+          @endif
+          @if(isset($filtroFechaIni))
+          "endDate": fecha_fin,
+          @endif
+          showDropdowns: true
+        }, cb);
+    });
+  </script>
+
+<script type="module">
 
   $(document).ready(function() {
     $('.select2').select2({
@@ -115,18 +119,18 @@ calendar.render();
   });
 
   $(".clearAllItems").click(function() {
-    value = $(this).data('select');
+    let value = $(this).data('select');
     $('#' + value).val(null).trigger('change');
   });
 
   $(".selectAllItems").click(function() {
-    value = $(this).data('select');
+    let value = $(this).data('select');
     $("#" + value + " > option").prop("selected", true);
     $("#" + value).trigger("change");
   });
 </script>
 
-<script>
+<script type="text/javascript">
   function modalRespuesta(peticionId, personaId)
   {
     Livewire.dispatch('modalRespuesta', { peticionId: peticionId, personaId: personaId });
@@ -138,7 +142,7 @@ calendar.render();
   }
 </script>
 
-<script>
+<script type="text/javascript">
   function confirmarEliminacionMasiva(cantidad, tipo)
   {
     if(cantidad>0)
@@ -188,185 +192,39 @@ calendar.render();
       }
     })
   }
-
-
 </script>
 @endsection
 
 
 @section('content')
-
-<div class="card app-calendar-wrapper">
-  <div class="row g-0">
-    <!-- Calendar Sidebar -->
-    <div class="col-3 app-calendar-sidebar" id="app-calendar-sidebar">
-      <div class="border-bottom p-4 my-sm-0 mb-3">
-        <div class="d-grid">
-          <button class="btn btn-primary btn-toggle-sidebar" data-bs-toggle="offcanvas" data-bs-target="#addEventSidebar" aria-controls="addEventSidebar">
-            <i class="ti ti-plus me-1"></i>
-            <span class="align-middle">Add Event</span>
-          </button>
-        </div>
-      </div>
-      <div class="p-3">
-        <!-- inline calendar (flatpicker) -->
-        <div class="inline-calendar"></div>
-
-        <hr class="container-m-nx mb-4 mt-3">
-
-        <!-- Filter -->
-        <div class="mb-3 ms-3">
-          <small class="text-small text-muted text-uppercase align-middle">Filter</small>
-        </div>
-
-        <div class="form-check mb-2 ms-3">
-          <input class="form-check-input select-all" type="checkbox" id="selectAll" data-value="all" checked>
-          <label class="form-check-label" for="selectAll">View All</label>
-        </div>
-
-        <div class="app-calendar-events-filter ms-3">
-          <div class="form-check form-check-danger mb-2">
-            <input class="form-check-input input-filter" type="checkbox" id="select-personal" data-value="personal" checked>
-            <label class="form-check-label" for="select-personal">Personal</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input input-filter" type="checkbox" id="select-business" data-value="business" checked>
-            <label class="form-check-label" for="select-business">Business</label>
-          </div>
-          <div class="form-check form-check-warning mb-2">
-            <input class="form-check-input input-filter" type="checkbox" id="select-family" data-value="family" checked>
-            <label class="form-check-label" for="select-family">Family</label>
-          </div>
-          <div class="form-check form-check-success mb-2">
-            <input class="form-check-input input-filter" type="checkbox" id="select-holiday" data-value="holiday" checked>
-            <label class="form-check-label" for="select-holiday">Holiday</label>
-          </div>
-          <div class="form-check form-check-info">
-            <input class="form-check-input input-filter" type="checkbox" id="select-etc" data-value="etc" checked>
-            <label class="form-check-label" for="select-etc">ETC</label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /Calendar Sidebar -->
-
-    <!-- Calendar & Modal -->
-    <div class="col-9 app-calendar-content">
-      <div class="card shadow-none border-0">
-        <div class="card-body pb-0">
-          <!-- FullCalendar -->
-          <div id="calendar"></div>
-        </div>
-      </div>
-      <div class="app-overlay"></div>
-      <!-- FullCalendar Offcanvas -->
-      <div class="offcanvas offcanvas-end event-sidebar" tabindex="-1" id="addEventSidebar" aria-labelledby="addEventSidebarLabel">
-        <div class="offcanvas-header my-1">
-          <h5 class="offcanvas-title" id="addEventSidebarLabel">Add Event</h5>
-          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body pt-0">
-          <form class="event-form pt-0" id="eventForm" onsubmit="return false">
-            <div class="mb-3">
-              <label class="form-label" for="eventTitle">Title</label>
-              <input type="text" class="form-control" id="eventTitle" name="eventTitle" placeholder="Event Title" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="eventLabel">Label</label>
-              <select class="select2 select-event-label form-select" id="eventLabel" name="eventLabel">
-                <option data-label="primary" value="Business" selected>Business</option>
-                <option data-label="danger" value="Personal">Personal</option>
-                <option data-label="warning" value="Family">Family</option>
-                <option data-label="success" value="Holiday">Holiday</option>
-                <option data-label="info" value="ETC">ETC</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="eventStartDate">Start Date</label>
-              <input type="text" class="form-control" id="eventStartDate" name="eventStartDate" placeholder="Start Date" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="eventEndDate">End Date</label>
-              <input type="text" class="form-control" id="eventEndDate" name="eventEndDate" placeholder="End Date" />
-            </div>
-            <div class="mb-3">
-              <label class="switch">
-                <input type="checkbox" class="switch-input allDay-switch" />
-                <span class="switch-toggle-slider">
-                  <span class="switch-on"></span>
-                  <span class="switch-off"></span>
-                </span>
-                <span class="switch-label">All Day</span>
-              </label>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="eventURL">Event URL</label>
-              <input type="url" class="form-control" id="eventURL" name="eventURL" placeholder="https://www.google.com" />
-            </div>
-            <div class="mb-3 select2-primary">
-              <label class="form-label" for="eventGuests">Add Guests</label>
-              <select class="select2 select-event-guests form-select" id="eventGuests" name="eventGuests" multiple>
-                <option data-avatar="1.png" value="Jane Foster">Jane Foster</option>
-                <option data-avatar="3.png" value="Donna Frank">Donna Frank</option>
-                <option data-avatar="5.png" value="Gabrielle Robertson">Gabrielle Robertson</option>
-                <option data-avatar="7.png" value="Lori Spears">Lori Spears</option>
-                <option data-avatar="9.png" value="Sandy Vega">Sandy Vega</option>
-                <option data-avatar="11.png" value="Cheryl May">Cheryl May</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="eventLocation">Location</label>
-              <input type="text" class="form-control" id="eventLocation" name="eventLocation" placeholder="Enter Location" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="eventDescription">Description</label>
-              <textarea class="form-control" name="eventDescription" id="eventDescription"></textarea>
-            </div>
-            <div class="mb-3 d-flex justify-content-sm-between justify-content-start my-4">
-              <div>
-                <button type="submit" class="btn btn-primary btn-add-event me-sm-3 me-1">Add</button>
-                <button type="reset" class="btn btn-label-secondary btn-cancel me-sm-0 me-1" data-bs-dismiss="offcanvas">Cancel</button>
-              </div>
-              <div><button class="btn btn-label-danger btn-delete-event d-none">Delete</button></div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-    <!-- /Calendar & Modal -->
-  </div>
-</div>
-
-
 <h4 class="mb-1">Gestionar peticiones</h4>
 <p class="mb-4">Aquí encontraras el listado de peticiones para hacerles seguimiento y gestionarlas.</p>
 
 @include('layouts.status-msn')
 
-  <div class="row mb-2">
-    <div class="row">
-      <!-- Cards with few info -->
-      @foreach( $indicadores as $indicador )
-      <div class="col-lg-4 col-sm-6 mb-2">
-        <a href="{{ route('peticion.gestionar', $indicador->url) }}">
-          <div class="card h-100">
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div class="card-title mb-0">
-                <h5 class="mb-0 me-2">{{ $indicador->cantidad }}</h5>
-                <small class="text-black">{{ $indicador->nombre }}</small>
-              </div>
-              <div class="card-icon">
-                <span class="badge {{ $indicador->color}} rounded-pill p-2">
-                  <i class='{{ $indicador->icono}} ti-lg'></i>
-                </span>
-              </div>
+<!-- Create the editor container -->
+  <div class="row mb-2 mt-10">
+    <!-- Cards with few info -->
+    @foreach( $indicadores as $indicador )
+    <div class="col-lg-4 col-sm-6 mb-2">
+      <a href="{{ route('peticion.gestionar', $indicador->url) }}">
+        <div class="card h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="card-title mb-0">
+              <h5 class="mb-0 me-2">{{ $indicador->cantidad }}</h5>
+              <small class="text-black">{{ $indicador->nombre }}</small>
+            </div>
+            <div class="card-icon">
+              <span class="badge {{ $indicador->color}} rounded-pill p-2">
+                <i class='{{ $indicador->icono}} ti-lg'></i>
+              </span>
             </div>
           </div>
-        </a>
-      </div>
-      @endforeach
-      <!--/ Cards with few info -->
+        </div>
+      </a>
     </div>
+    @endforeach
+    <!--/ Cards with few info -->
   </div>
 
   <div class="row mt-5">

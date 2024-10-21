@@ -10,21 +10,23 @@ $formularios=$rolActivo->formularios()->where('privilegio','=','subitem_nuevo_as
 
   <!-- ! Hide app brand if navbar-full -->
   @if(!isset($navbarFull))
-    <div class="app-brand demo">
-      <a href="{{url('/')}}" class="app-brand-link">
-        <span class="app-brand-logo demo">@include('_partials.macros',["height"=>20])</span>
-        <span class="app-brand-text demo menu-text fw-bold">{{config('variables.templateName')}}</span>
-      </a>
+  <div class="app-brand demo">
+    <a href="{{url('/')}}" class="app-brand-link">
+      <span class="app-brand-logo demo p-0">
+        @include('_partials.macros',["height"=>"40px", "width"=>"40px", "fill"=> "#3772e4" ])
+      </span>
+      <span class="app-brand-text demo menu-text fw-bold fs-4 pt-3">{{config('variables.templateName')}}</span>
+    </a>
 
-      <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
-        <i class="ti menu-toggle-icon d-none d-xl-block align-middle"></i>
-        <i class="ti ti-x d-block d-xl-none ti-md align-middle"></i>
-      </a>
-    </div>
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+      <i class="ti menu-toggle-icon d-none d-xl-block ti-sm align-middle"></i>
+      <i class="ti ti-x d-block d-xl-none ti-sm align-middle"></i>
+    </a>
+  </div>
   @endif
 
   <div class="menu-inner-shadow"></div>
-  
+
     <ul class="menu-inner py-1">
       <li class="menu-header small text-uppercase">
         <span class="menu-header-text">Menú</span>
