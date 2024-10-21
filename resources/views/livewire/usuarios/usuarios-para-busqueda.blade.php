@@ -15,10 +15,10 @@
   </div>
   @if($errors->has($id) && $obligatorio) <div class="text-danger form-label">{{ $errors->first($id) }}</div> @endif
   <div class="divListaBusquedaGrupos position-relative {{ $verListaBusqueda ? ''  : 'd-none' }}">
-    <div id="listaItemsBusqueda{{$id}}" class="panel-busqueda">
+    <div id="listaItemsBusqueda{{$id}}" class="panel-busqueda p-2">
       @if($usuarios && count($usuarios) >0)
         @foreach($usuarios as $usuario)
-        <a href="{{ $redirect ? route($redirect, $usuario->id) : 'javascript:;'}}" @if($tipoBuscador == "multiple") wire:click="seleccionarUsuarios({{$usuario->id}})" @elseif($tipoBuscador == "unico") wire:click="seleccionarUsuario({{$usuario->id}})" @endif class="dropdown-item d-flex align-items-center p-2 border">
+        <a href="{{ $redirect ? route($redirect, $usuario->id) : 'javascript:;'}}" @if($tipoBuscador == "multiple") wire:click="seleccionarUsuarios({{$usuario->id}})" @elseif($tipoBuscador == "unico") wire:click="seleccionarUsuario({{$usuario->id}})" @endif class="dropdown-item d-flex align-items-center p-2 m-1 border">
           <div class="d-flex align-items-center justify-content-center mx-auto me-3">
             <img src="{{ $configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario->foto) : $configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario->foto }}" alt="foto {{$usuario->primer_nombre}}" class="rounded-circle w-px-75" />
           </div>
@@ -131,9 +131,9 @@
               </div>
             </div>
 
-            <div class="d-flex align-items-start">
+            <div class="d-flex align-items-start align-middle">
               @if($rolActivo->hasPermissionTo('grupos.opcion_desvincular_asistentes_grupos'))
-              <button type="button" wire:click="quitarSeleccion({{ $usuarioSeleccionado->id }})" class="align-self-start btn btn-danger btn-xs p-1"><i class="ti ti-x fs-6"></i></button>
+              <button type="button" wire:click="quitarSeleccion({{ $usuarioSeleccionado->id }})" class="align-self-start btn btn-danger btn-sm p-1"><i class="ti ti-x"></i></button>
               @endif
             </div>
           </div>

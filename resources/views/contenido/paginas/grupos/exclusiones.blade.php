@@ -8,16 +8,20 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('page-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/css/pages/page-profile.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
+@vite([
+'resources/assets/vendor/scss/pages/page-profile.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js'
+])
 @endsection
 
 @section('page-script')
-<script>
+<script type="module">
   window.addEventListener('msn', event => {
     Swal.fire({
       title: event.detail.msnTitulo,

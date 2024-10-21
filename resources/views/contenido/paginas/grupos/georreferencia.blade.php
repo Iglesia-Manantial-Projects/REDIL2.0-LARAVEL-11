@@ -9,9 +9,12 @@ $isFooter = ($isFooter ?? false);
 
 <!-- Page -->
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+@vite([
+
+'resources/assets/vendor/libs/select2/select2.scss',
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+])
 @endsection
 
 @section('page-style')
@@ -19,57 +22,61 @@ $isFooter = ($isFooter ?? false);
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+])
 @endsection
 
 @section('page-script')
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
 
-<script>
+<script type="module">
+  // Inicialización del mapa
   var map = L.map('map').setView(['{{$latitudInicial}}', '{{$longitudInicial}}'], 13);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
 
-  var marcador;
+  // Hacer la función asignarAsistente globalmente accesible
+  window.asignarAsistente = function(grupoId, idUsuario) {
+    Livewire.dispatch('asignar-al-grupo', { grupoId: grupoId, idUsuario: idUsuario });
+  };
 
-  @if($grupo->latitud && $grupo->longitud)
-  crearMarcador('{{$grupo->latitud}}', '{{$grupo->longitud}}');
-  @endif
+  @foreach($grupos as $grupo)
+    @if($grupo->latitud != null && $grupo->longitud != null && $grupo->tipoGrupo->visible_mapa_asignacion == true)
+      var IconoGrupo = L.icon({
+        iconUrl: "{{$configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/pines-mapa/'.$grupo->tipoGrupo->geo_icono) : $configuracion->ruta_almacenamiento.'/img/foto-usuario/default-m.png' }}",
+        iconSize: [35, 45],
+        iconAnchor: [27, 27],
+        popupAnchor: [0, -14]
+      });
 
-  // evento que se dispara cuando doy clic sobre el mapa
-  map.on('click', (event)=> {
-    Livewire.dispatch('asignar-georreferencia-al-grupo', { grupoId: "{{$grupo->id}}", lat: event.latlng.lat, lon: event.latlng.lng});
-    if(marcador != null)
-    {
-      map.removeLayer(marcador);
-    }
-    crearMarcador(event.latlng.lat, event.latlng.lng);
-  })
+      var nombreGrupo = "{{$grupo->nombre}}";
+      var grupoId = "{{$grupo->id}}";
+      var tipoGrupo = "{{$grupo->tipoGrupo->nombre}}";
+      var direccionGrupo = "{{$grupo->direccion}}" != "" ? ` ubicado en la dirección '{{$grupo->direccion}}'` : "";
+      var nombreUsuario = "{{$usuario->nombre(3)}}";
+      var idUsuario = "{{$usuario->id}}";
 
-  // función que crea el pin o marcador
-  function crearMarcador(lat, lng){
-    let IconoGrupo = L.icon({
-      iconUrl: "{{$configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/pines-mapa/'.$grupo->tipoGrupo->geo_icono) : $configuracion->ruta_almacenamiento.'/img/foto-usuario/default-m.png' }}",
-      iconSize: [35, 45],
-      iconAnchor: [27, 27],
-      popupAnchor: [0, -14]
-    });
+      var DatosCelula = [{
+        "info": `Agregar a <b>'${nombreUsuario}'</b> al Grupo <b>${tipoGrupo} '${nombreGrupo}'${direccionGrupo}</b><br><br> <b><i class='ti ti-circle-plus'></i>Clic aquí para agregar </b>`,
+        "url": "#"
+      }];
 
-    marcador = L.marker([lat, lng], {
-      icon: IconoGrupo,
-      title: '{{$grupo->nombre}} ( LAT: '+lat+' LNG: '+lng+' )',
-      alt: '{{$grupo->id}}'
-    })
-    .bindPopup( '<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+lat+'%2C'+lng+'" target="_blank">' + "<b>Nombre:</b> {{$grupo->nombre}} <br> <b>Latitud:</b> "+lat+"<br> <b>Longitud:</b> "+lng + ' <br><br> <b> <i class="ti ti-brand-google-maps"></i> Ver en google  </b> </a>' )
-
-    map.addLayer(marcador);
-    map.flyTo([lat, lng], 13);
-  }
+      L.marker(['{{$grupo->latitud}}', '{{$grupo->longitud}}'], {
+        icon: IconoGrupo,
+        title: nombreGrupo,
+        alt: nombreGrupo
+      })
+      .bindPopup(`<a href="#" onclick="asignarAsistente(${grupoId}, ${idUsuario}); return false;">${DatosCelula[0].info}</a>`)
+      .addTo(map);
+    @endif
+  @endforeach
 </script>
-<script>
+
+<script type="module">
   window.addEventListener('verEnElMapa', event => {
     map.flyTo(new L.LatLng(event.detail.latitud, event.detail.longitud), event.detail.zoom);
   });

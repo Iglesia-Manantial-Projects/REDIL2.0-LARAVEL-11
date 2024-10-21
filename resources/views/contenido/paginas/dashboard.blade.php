@@ -18,7 +18,7 @@ $configData = Helper::appClasses();
 <br>
 {{ auth()->user()->informacion_opcional }}
 <br>
-Tipos de usuario
+Tipos de usuario....
 
 
 <br><br>

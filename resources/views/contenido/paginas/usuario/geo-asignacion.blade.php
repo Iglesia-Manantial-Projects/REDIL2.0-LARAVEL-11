@@ -8,9 +8,12 @@ $isFooter = ($isFooter ?? false);
 @section('title', 'Geo asignación')
 
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+@vite([
+
+'resources/assets/vendor/libs/select2/select2.scss',
+'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+])
 @endsection
 
 @section('page-style')
@@ -18,25 +21,30 @@ $isFooter = ($isFooter ?? false);
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
+'resources/assets/vendor/libs/flatpickr/flatpickr.js',
+])
 @endsection
 
 @section('page-script')
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
 
 <script type="module">
+  // Inicialización del mapa
   var map = L.map('map').setView(['{{$latitudInicial}}', '{{$longitudInicial}}'], 13);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
 
-  //var osmGeocoder = new L.Control.OSMGeocoder();
+  // Hacer la función asignarAsistente globalmente accesible
+  window.asignarAsistente = function(grupoId, idUsuario) {
+    Livewire.dispatch('asignar-al-grupo', { grupoId: grupoId, idUsuario: idUsuario });
+  };
 
   @foreach($grupos as $grupo)
     @if($grupo->latitud != null && $grupo->longitud != null && $grupo->tipoGrupo->visible_mapa_asignacion == true)
-
       var IconoGrupo = L.icon({
         iconUrl: "{{$configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/pines-mapa/'.$grupo->tipoGrupo->geo_icono) : $configuracion->ruta_almacenamiento.'/img/foto-usuario/default-m.png' }}",
         iconSize: [35, 45],
@@ -47,33 +55,26 @@ $isFooter = ($isFooter ?? false);
       var nombreGrupo = "{{$grupo->nombre}}";
       var grupoId = "{{$grupo->id}}";
       var tipoGrupo = "{{$grupo->tipoGrupo->nombre}}";
-      var direccionGrupo = "";
-      if ("{{$grupo->direccion}}" != "") {
-        direccionGrupo = " ubicado en la dirección '{{$grupo->direccion}}'";
-      }
+      var direccionGrupo = "{{$grupo->direccion}}" != "" ? ` ubicado en la dirección '{{$grupo->direccion}}'` : "";
       var nombreUsuario = "{{$usuario->nombre(3)}}";
       var idUsuario = "{{$usuario->id}}";
 
-      DatosCelula = [{
-        "info": "Agregar a <b>'" + nombreUsuario + "'</b> al Grupo  <b>" + tipoGrupo + " '" + nombreGrupo + "'" + direccionGrupo + "</b><br><br> <b><i class='ti ti-circle-plus'></i>Clic aquí para agregar </b>",
-        "url": "javascript:asignarAsistente(" + grupoId + "," + idUsuario + ");"
+      var DatosCelula = [{
+        "info": `Agregar a <b>'${nombreUsuario}'</b> al Grupo <b>${tipoGrupo} '${nombreGrupo}'${direccionGrupo}</b><br><br> <b><i class='ti ti-circle-plus'></i>Clic aquí para agregar </b>`,
+        "url": "#"
       }];
 
       L.marker(['{{$grupo->latitud}}', '{{$grupo->longitud}}'], {
         icon: IconoGrupo,
-        title: 'title',
-        alt: 'alt'
+        title: nombreGrupo,
+        alt: nombreGrupo
       })
-      .bindPopup('<a href="' + DatosCelula[0].url + '" target="">' + DatosCelula[0].info + '</a>')
+      .bindPopup(`<a href="#" onclick="asignarAsistente(${grupoId}, ${idUsuario}); return false;">${DatosCelula[0].info}</a>`)
       .addTo(map);
-
     @endif
   @endforeach
-
-  function asignarAsistente(grupoId, idUsuario) {
-    Livewire.dispatch('asignar-al-grupo', { grupoId: grupoId, idUsuario: idUsuario });
-  }
 </script>
+
 <script type="module">
   window.addEventListener('verEnElMapa', event => {
     map.flyTo(new L.LatLng(event.detail.latitud, event.detail.longitud), event.detail.zoom);

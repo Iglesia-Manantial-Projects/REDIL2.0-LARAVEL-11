@@ -1353,10 +1353,7 @@ class GrupoController extends Controller
     ]);
   }
 
-
-
-
-  public function graficoDelMinisterio($id_nodo="U-logueado", $maximos_niveles=2)
+    public function graficoDelMinisterio($id_nodo="U-logueado", $maximos_niveles=2)
 	{
 		$configuracion=Configuracion::find(1);
 		if($maximos_niveles!=20){
@@ -1375,9 +1372,9 @@ class GrupoController extends Controller
 
 	  $mensaje="";
     $contador=0;
-    $tamano_nodo_grupo=0.7;
-    $tamano_nodo_general=0.7;
-    $factor_vision=5;
+    $tamano_nodo_grupo=20;
+    $tamano_nodo_general=20;
+    $factor_vision=1;
     $inicio_fila=$factor_vision*-1;
     $distancia_nodos_usuario=0;
     $distancia_nodos_grupo=0;
@@ -1387,7 +1384,7 @@ class GrupoController extends Controller
     $x_grupo=0;
     $x=0;
     $y=0;
-    $y_grupo=750000;
+    $y_grupo=-750000;
     $array_ids_usuarios= array();
     $array_ids_grupos_dibujados= array();
     $array_ids_usuarios_dibujados= array();
@@ -1460,7 +1457,7 @@ class GrupoController extends Controller
 
       if($contador==1)
       {
-        $distancia_nodos_grupo=1175000;
+        $distancia_nodos_grupo=-1175000;
         $distancia_nodos_usuario=235000;
         $inicio_fila=$inicio_fila-470000;
         $x_usuario=$inicio_fila;
@@ -1543,7 +1540,7 @@ class GrupoController extends Controller
             $image->scale = 1.3;
             $image->clip = 0.85;
 
-            $item->image = $image;
+            $item->image =$urlFoto;
             $nodos[] = $item;
           }else{
               array_push($array_ids_usuarios_no_dibujados, $usuario->id);
@@ -1602,7 +1599,7 @@ class GrupoController extends Controller
             $x_grupo=$x_grupo+$distancia_nodos_grupo;
             $cantidad_usuarios_grupo=$grupo->asistentes()->count();
             $usuarios_grupo=$grupo->asistentes()->orderBy('users.indice_grafico_ministerial', 'asc')->get();
-            $y_usuario=$y_grupo+750000;
+            $y_usuario=$y_grupo-750000;
 
             $tamano_nodo_asistente=$tamano_nodo_grupo*0.5;
             foreach($usuarios_grupo as $usuario_grupo)
@@ -1645,7 +1642,7 @@ class GrupoController extends Controller
                 $image->scale = 1.3;
                 $image->clip = 0.85;
 
-                $item->image = $image;
+                $item->image = $urlFoto;
                 $nodos[] = $item;
 
                 array_push($array_ids_usuarios_dibujados, $usuario_grupo->id);
@@ -1705,11 +1702,11 @@ class GrupoController extends Controller
       }
 
       $tipo_nodo="modificado";
-      $y_grupo=$y_grupo+1500000;
+      $y_grupo=$y_grupo-1500000;
     }
 
     $usuarios_no_dibujados=User::whereIn("id",$array_ids_usuarios_no_dibujados)->get();
-
+    //return $nodos;
     return view('contenido.paginas.grupos.grafico-del-ministerio', [
       'nodos'=> $nodos,
       'aristas'=> $aristas,

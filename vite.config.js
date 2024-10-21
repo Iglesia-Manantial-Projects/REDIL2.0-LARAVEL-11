@@ -76,5 +76,10 @@ export default defineConfig({
     }),
     html(),
     libsWindowAssignment()
-  ]
+  ],resolve: {
+    alias: {
+        // Asegúrate de que sigma esté disponible
+        'sigma': 'node_modules/sigma/build/sigma.min.js',
+    },
+},
 });

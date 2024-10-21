@@ -8,81 +8,104 @@ $configData = Helper::appClasses();
 
 <!-- Page -->
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+@vite([
+'resources/assets/vendor/libs/select2/select2.scss',
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
+])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+<!-- Dependencias necesarias en el orden correcto -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.4/graphology.umd.min.js"></script>
+<!-- Asegúrate de usar la versión más reciente y estable de Sigma -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script>
+<!-- Programa de nodos de imagen -->
+<script src="
+https://cdn.jsdelivr.net/npm/@sigma/node-image@3.0.0-beta.15/dist/sigma-node-image.cjs.min.js
+"></script>
 
-<script src="{{asset('assets/vendor/libs/sigma/src/sigma.core.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/alert.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/conrad.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/utils/sigma.utils.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/sigma.settings.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/classes/sigma.classes.dispatcher.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/classes/sigma.classes.configurable.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/classes/sigma.classes.graph.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/classes/sigma.classes.camera.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/classes/sigma.classes.quad.js')}}"></script>
+@vite([
+'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
+'resources/assets/vendor/libs/select2/select2.js',
 
-<script src="{{asset('assets/vendor/libs/sigma/src/captors/sigma.captors.touch.js')}}"></script>
-
-<script src="{{asset('assets/vendor/libs/sigma/src/renderers/canvas/sigma.canvas.hovers.def.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/renderers/canvas/sigma.canvas.edges.def.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/middlewares/sigma.middlewares.rescale.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/misc/sigma.misc.drawHovers.js')}}"></script>
-
-<script src="{{asset('assets/vendor/libs/sigma/src/misc/sigma.misc.animation.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/misc/sigma.misc.bindDOMEvents.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/shapes/shape-library.js')}}"></script>
-
-<script src="{{asset('assets/vendor/libs/sigma/src/renderers/sigma.renderers.canvas.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/renderers/canvas/sigma.canvas.labels.def.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/misc/sigma.misc.bindEvents.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/shapes/sigma.renderers.customShapes.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sigma/src/captors/sigma.captors.mouse.js')}}"></script>
-
+])
 @endsection
 
 @section('page-script')
 
-<script>
-sigma.utils.pkg('sigma.canvas.nodes');
 
- var nodos = JSON.parse(<?php print json_encode(json_encode($nodos)); ?>);
- var aristas = JSON.parse(<?php print json_encode(json_encode($aristas)); ?>);
+<script type="module">
+ document.addEventListener('DOMContentLoaded', function() {
+          // Arreglo de nodos
+          const nodes = JSON.parse(<?php print json_encode(json_encode($nodos)); ?>);
+          const edges = JSON.parse(<?php print json_encode(json_encode($aristas)); ?>);
 
-  //Esta
-  var g = {
-   nodes: nodos,
-   edges: aristas
-  };
+          // Crear el grafo
+          const graph = new graphology.Graph();
 
-  var s = new sigma({
-    graph: g,
-    settings: {
-      minNodeSize: 10,
-      maxNodeSize: 20,
-    }
-  });
-  CustomShapes.init(s);
+          // Agregar nodos al grafo
+          nodes.forEach(node => {
 
-  s.addRenderer({
-    id: 'main',
-    type: 'canvas',
-    container: document.getElementById('graph-container'),
-    freeStyle: false
-  });
+              graph.addNode(node.id, {
+                  label: node.label,
+                  x: node.x,
+                  y: node.y,
+                  size: node.size,
+                  color: node.color,
+                  image:node.image,
+                  minNodeSize: 10,
+                  type: "image",
+                  maxNodeSize: 20,
+                  showLabel: false  // Inicialmente ocultamos todas las etiquetas
+              });
+          });
 
-  s.bind('clickNode', function(e) {
-    var nodeId = e.data.node.id;
-    window.top.location.href = '/grupo/grafico-del-ministerio/'+nodeId;
-  });
+          // Agregar aristas al grafo
+          edges.forEach(edge => {
+              graph.addEdge(edge.source, edge.target, {
+                  size: edge.size,
+                  color: edge.color
+              });
+          });
 
-  s.refresh();
+        // Configuración básica de Sigma
+        const renderer = new Sigma(graph, document.getElementById("graph-container"), {
+            minCameraRatio: 0.1,
+            maxCameraRatio: 10,
+            defaultNodeColor: "#999",
+            defaultEdgeColor: "#999",
+            labelSize: 14,
+            labelWeight: "bold",
+            defaultEdgeType: "arrow",
+            labelRenderedSizeThreshold: 1,
+            renderLabels: false,  // Desactivamos el renderizado global de etiquetas
+            labelDensity: 0.7,
+            labelGridCellSize: 60,
+            nodeProgramClasses: {
+                   image: NodeImageProgram,
+                },
+
+            // Función personalizada para decidir si se muestra la etiqueta
+            labelRenderer: {
+                shouldRender: (node) => node.showLabel === true
+            }
+        });
+
+        // Manejar eventos de hover
+        renderer.on("enterNode", ({ node }) => {
+            // Mostrar la etiqueta del nodo cuando el mouse está encima
+            graph.setNodeAttribute(node, "showLabel", true);
+            renderer.refresh();
+        });
+
+        renderer.on("leaveNode", ({ node }) => {
+            // Ocultar la etiqueta cuando el mouse sale del nodo
+            graph.setNodeAttribute(node, "showLabel", false);
+            renderer.refresh();
+        });
+    });
 </script>
+
 
 <script type="text/javascript">
   $('.cargando').click(function(){

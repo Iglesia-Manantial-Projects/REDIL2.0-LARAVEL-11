@@ -211,8 +211,7 @@ class Helpers
       }
     }
   }
-  
-  
+
   function bloquesDePermisos()
   {
     $bloques = [];
@@ -383,8 +382,6 @@ class Helpers
   {
     $camposRelaciones = [];
 
-   
-
     $item = new \stdClass();
     $item->id = 1;
     $item->value = 'pariente_user_id';
@@ -402,10 +399,9 @@ class Helpers
     $item->value = 'tipo_pariente_id';
     $item->nombre = 'Parentesco';
     $camposRelaciones[] = $item;
-   
+
     return $camposRelaciones;
   }
-
 
   public static function estadoPeticion($estado)
   {
@@ -694,5 +690,14 @@ class Helpers
       $array = json_decode($libros);
 
       return $array;
+  }
+
+  public static function meses($formato){
+
+    if($formato == 'corto')
+    return ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Оct', 'Nov', 'Dic'];
+    else
+    return ['Enero', 'Febreo', 'Мarzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
   }
 }

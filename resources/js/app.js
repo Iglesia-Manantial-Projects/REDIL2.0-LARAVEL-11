@@ -1,4 +1,7 @@
 import './bootstrap';
+import { Graph } from "graphology";
+import { Sigma } from "sigma";
+
 /*
   Add custom scripts here
 */

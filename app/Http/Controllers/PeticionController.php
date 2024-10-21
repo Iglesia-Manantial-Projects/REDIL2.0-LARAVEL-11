@@ -51,6 +51,14 @@ class PeticionController extends Controller
 
     }
 
+    // Filtro por fechas
+    $filtroFechaIni = $request->filtroFechaIni ? Carbon::parse($request->filtroFechaIni)->format('Y-m-d') : Carbon::now()->firstOfMonth()->format('Y-m-d');
+    $filtroFechaFin = $request->filtroFechaFin ? Carbon::parse($request->filtroFechaFin)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+
+    $peticiones = $peticiones->whereBetween('fecha', [$filtroFechaIni, $filtroFechaFin]);
+    //$textoBusqueda .= '<b>, Rango </b> Del ' . $filtroFechaIni . ' al ' . $filtroFechaFin;
+
+
     $arrayPaises = $peticiones->where('pais_id', '!=', null)->unique('pais_id')->pluck('pais_id')->toArray();
     $paises = Pais::whereIn('id', $arrayPaises)->get();
 
@@ -86,12 +94,7 @@ class PeticionController extends Controller
     $primerLabelTipoPeticion = $labelsTiposPeticiones[0] ? $labelsTiposPeticiones[0]: '';
 
 
-    // Filtro por fechas
-    $filtroFechaIni = $request->filtroFechaIni ? Carbon::parse($request->filtroFechaIni)->format('Y-m-d') : Carbon::now()->firstOfMonth()->format('Y-m-d');
-    $filtroFechaFin = $request->filtroFechaFin ? Carbon::parse($request->filtroFechaFin)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
 
-    $peticiones = $peticiones->whereBetween('fecha', [$filtroFechaIni, $filtroFechaFin]);
-    //$textoBusqueda .= '<b>, Rango </b> Del ' . $filtroFechaIni . ' al ' . $filtroFechaFin;
 
 
 
@@ -383,6 +386,7 @@ class PeticionController extends Controller
     $camposInformeExcel = CampoInformeExcel::orderBy('orden', 'asc')->get();
     $pasosCrecimiento = PasoCrecimiento::orderBy('updated_at', 'asc')->get();
     $camposExtras = CampoExtra::where('visible', '=', true)->get();
+    $meses = Helpers::meses('largo');
 
     return view('contenido.paginas.peticiones.gestionar', [
       'rolActivo' => $rolActivo,
@@ -404,7 +408,8 @@ class PeticionController extends Controller
       'camposExtras' => $camposExtras,
       'camposPeticiones' => $camposPeticiones,
       'paises' => $paises,
-      'filtroPaises' => $filtroPaises
+      'filtroPaises' => $filtroPaises,
+      'meses' => $meses
     ]);
 
   }

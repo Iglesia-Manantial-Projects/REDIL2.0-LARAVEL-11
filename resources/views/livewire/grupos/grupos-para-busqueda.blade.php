@@ -14,10 +14,10 @@
 
   @if($errors->has($id) && $obligatorio) <div class="text-danger form-label">{{ $errors->first($id) }}</div> @endif
   <div class="divListaBusquedaGrupos position-relative {{ $verListaBusqueda ? ''  : 'd-none' }}">
-    <div id="listaItemsBusquedaGrupos" class="panel-busqueda">
+    <div id="listaItemsBusquedaGrupos" class="panel-busqueda p-2">
       @if($grupos && count($grupos) >0)
       @foreach($grupos as $grupo)
-      <a href="javascript:;" @if($multiple) wire:click="seleccionarGrupos({{$grupo->id}})" @else wire:click="seleccionarGrupo({{$grupo->id}})" @endif class="dropdown-item d-flex align-items-center p-2 border">
+      <a href="javascript:;" @if($multiple) wire:click="seleccionarGrupos({{$grupo->id}})" @else wire:click="seleccionarGrupo({{$grupo->id}})" @endif class="dropdown-item d-flex align-items-center p-2 mb-1 border">
         <div class="d-flex align-items-center justify-content-center rounded me-3" style="background-color: {{$grupo->tipoGrupo->color }}">
           <i class="ti ti-users-group text-white" style="font-size: 3.0rem !important"></i>
         </div>
