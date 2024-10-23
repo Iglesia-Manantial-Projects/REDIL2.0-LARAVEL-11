@@ -49,22 +49,24 @@ class TemaController extends Controller
     public function ver(Tema $tema)
     {
       $configuracion=Configuracion::find(1);
+      $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
 
       return view('contenido.paginas.temas.ver-tema',[
         'tema'=>$tema,
-        'configuracion'=>$configuracion
+        'configuracion'=>$configuracion,
+        'rolActivo' => $rolActivo
         ]);
     }
 
     public function crear(Request $request)
     {
-        
+
         // aqui para conv
         $html=$request->contenidoEditor;
         //$html=strip_tags($html, ' <iframe> </iframe><img> </img> <tr><td> </tr></td> <tbody> </tbody> </table> <table> <h1></h1> <h2></h2> <h3></h3> <h4></h4> <h5></h5><u> </u> <ul> </ul> <li> </li> <a> </a> <p> </p> <br> <b> </b>');
 		    $html=str_replace("'",'',$html);
         $html=str_replace("\'",'',$html);
-    
+
 
         $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
         $configuracion=Configuracion::find(1);
@@ -120,8 +122,8 @@ class TemaController extends Controller
 
             // aqui se crean las relaciones a través de tablas intermedias
 
-         
-            
+
+
 
         }
 
@@ -135,7 +137,7 @@ class TemaController extends Controller
         $tema->tiposGrupos()->attach($request->tipoGrupo);
         //  CREO LA RELACIÓN CON LOS  GRUPOS
         $tema->temasGrupos()->attach($request->temasGrupos);
-        
+
 
         return back()->with('success', "El tema <b>".$tema->titulo."</b> fue creado con éxito.");
 
@@ -162,7 +164,7 @@ class TemaController extends Controller
 
     public function actualizar(Tema $tema)
     {
-    
+
       $sedes=Sede::get();
       $categorias=CategoriaTema::get();
       $tiposGrupo=TipoGrupo::get();
@@ -174,9 +176,9 @@ class TemaController extends Controller
       $tiposGrupoTema=$tema->tiposGrupos()->select('tipo_grupos.id')->pluck('tipo_grupos.id')->toArray();
       $sedesTema=$tema->sedes()->select('sedes.id')->pluck('sedes.id')->toArray();
       $tiposUsuarioTema=$tema->tiposUsuarios()->select('tipo_usuarios.id')->pluck('tipo_usuarios.id')->toArray();
-   
 
-   
+
+
         return view('contenido.paginas.temas.actualizar-tema',[
                 'categorias'=>$categorias,
                 'tema'=>$tema,
@@ -190,23 +192,23 @@ class TemaController extends Controller
                 'tiposGrupoTema'=>$tiposGrupoTema,
                 'sedesTema'=>$sedesTema,
                 'tiposUsuarioTema'=>$tiposUsuarioTema
-                
-              
+
+
 
 
         ]);
-    
+
 
     }
 
     public function update(Request $request, Tema $tema)
     {
-      
+
       $html=$request->contenidoEditor;
         //$html=strip_tags($html, ' <iframe> </iframe><img> </img> <tr><td> </tr></td> <tbody> </tbody> </table> <table> <h1></h1> <h2></h2> <h3></h3> <h4></h4> <h5></h5><u> </u> <ul> </ul> <li> </li> <a> </a> <p> </p> <br> <b> </b>');
 		    $html=str_replace("'",'',$html);
         $html=str_replace("\'",'',$html);
-    
+
 
         $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
         $configuracion=Configuracion::find(1);
@@ -221,7 +223,7 @@ class TemaController extends Controller
 
           ]
         );
-       
+
         $tema->titulo=$request->nombre_del_tema;
         $tema->url=$request->url_externo;
         $tema->estado=TRUE;
@@ -264,7 +266,7 @@ class TemaController extends Controller
           //  CREO LA RELACIÓN CON LOS TIPOS DE GRUPOS
           $tema->tiposGrupos()->sync($request->tipoGrupo);
            //  CREO LA RELACIÓN CON LOS  GRUPOS
-           
+
            $tema->temasGrupos()->sync(json_decode($request->inputGruposIds));
 
 
@@ -272,9 +274,9 @@ class TemaController extends Controller
         $configuracion=Configuracion::find(1);
         $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
         $temas_categoria=$tema->categorias()->select('categoria_tema_id')->pluck('categoria_tema_id')->toArray();
-  
+
         return back()->with('success', "El tema <b>".$tema->titulo."</b> fue actualizado con éxito.");
-        
+
 
          /*
           return view('contenido.paginas.temas.actualizar-tema',[
@@ -286,14 +288,14 @@ class TemaController extends Controller
           ]);
          */
 
-    
+
 
     }
 
     public function listar(Request $request )
     {
-     
-      
+
+
         $rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
         $configuracion=Configuracion::find(1);
         $categorias=CategoriaTema::get();
@@ -309,15 +311,15 @@ class TemaController extends Controller
           ->select('temas.*','temas_categorias.categoria_tema_id')
           ->get();
 
-        }else 
+        }else
         {
-          ///AQUI ES PARA SOLO CARGAR LOS TEMAS QUE ME CORRESPONDEN 
+          ///AQUI ES PARA SOLO CARGAR LOS TEMAS QUE ME CORRESPONDEN
           $user=auth()->user();
           $grupos=$user->gruposDondeAsiste()->select('grupos.id')->pluck('grupos.id')->toArray();
           $tiposGrupo=$user->gruposDondeAsiste()->select('grupos.tipo_grupo_id')->pluck('grupos.tipo_grupo_id')->toArray();
           $sede=$user->sede;
           $tipoUsuario=$user->tipoUsuario;
-        
+
           $temas=Tema::leftJoin('sedes_temas','temas.id','=','sedes_temas.tema_id')
           ->leftJoin('tipos_usuarios_temas','temas.id','=','tipos_usuarios_temas.tema_id')
           ->leftJoin('tipos_grupos_temas','temas.id','=','tipos_grupos_temas.tema_id')
@@ -329,21 +331,21 @@ class TemaController extends Controller
            })
            ->orWhere(function ($query) use($sede, $tipoUsuario,$grupos,$tiposGrupo) {
             return $query->where('sedes_temas.sede_id', $sede->id);
-                     
+
            })->orWhere(function ($query) use($tipoUsuario) {
             return $query->where('tipos_usuarios_temas.tipo_usuario_id',$tipoUsuario->id);
-                         
+
            })
            ->orWhere(function ($query) use($tiposGrupo)
            {
             return $query->whereIn('tipos_grupos_temas.tipo_grupo_id',$tiposGrupo);
-                        
+
            })->orWhere(function ($query) use($grupos) {
             return $query->whereIn('grupos_temas.grupo_id',$grupos);
            })
            ->select('temas.*','sedes_temas.sede_id','tipos_usuarios_temas.tipo_usuario_id','tipos_grupos_temas.tipo_grupo_id','grupos_temas.grupo_id','temas_categorias.categoria_tema_id')
           ->get();
-          
+
           $temas=$temas->filter(function ($tema) use($sede,$grupos,$tipoUsuario,$tiposGrupo)
           {
                 $bandera=TRUE;
@@ -372,14 +374,14 @@ class TemaController extends Controller
           });
         }
         // Busqueda por palabra clave
-        if ($request->buscar) 
+        if ($request->buscar)
         {
           $buscar = htmlspecialchars($request->buscar);
           $buscar = Helpers::sanearStringConEspacios($buscar);
           $buscar = str_replace(["'"], '', $buscar);
           $buscar_array = explode(' ', $buscar);
 
-          foreach ($buscar_array as $palabra) 
+          foreach ($buscar_array as $palabra)
           {
             $temas = $temas->filter(function ($tema) use ($palabra) {
               $respuesta  = false !== stristr(Helpers::sanearStringConEspacios($tema->titulo), $palabra);

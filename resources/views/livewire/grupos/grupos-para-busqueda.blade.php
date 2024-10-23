@@ -61,28 +61,29 @@
 
   @if($multiple)
     <input type="text" id="{{$id}}" name="{{$id}}" value="{{ json_encode($gruposSeleccionadosIds) }}" class="form-control d-none" placeholder="Enter Name">
-    @foreach($gruposSeleccionados as $grupoSel)
-    <div class="dropdown-item w-100 mx-0 d-flex p-2 border  flex-grow-1">
-      <div class="flex-fill d-flex align-items-center">
-        <div class="d-flex align-items-center justify-content-center rounded me-3" style="background-color: {{$grupoSel->tipoGrupo->color }}">
-          <i class="ti ti-users-group text-white" style="font-size: 4.0rem !important"></i>
-        </div>
-        <div class="flex-grow-1 me-2">
-          <p class="fs-5 text-wrap m-0">{{ $grupoSel->nombre }}</p>
-          <p class="fs-6 text-wrap fw-bold m-0">ID: {{ $grupoSel->id }} | {{ $grupoSel->tipoGrupo->nombre }}</p>
-          @foreach ($grupoSel->encargados as $encargado)
-          <p class="fs-6 text-wrap m-0 mt-1"> <span class="badge px-1" style="background-color: {{$encargado->tipoUsuario->color}}"><i class="fs-6 {{ $encargado->tipoUsuario->icono }}"></i></span> {{ $encargado->nombre(3) }}</p>
-          @endforeach
-        </div>
-      </div>
 
-      <div class="d-flex align-items-start">
-        @if($rolActivo->hasPermissionTo('grupos.opcion_desvincular_asistentes_grupos'))
-        <button type="button" wire:click="quitarSeleccion({{ $grupoSel->id }})" class="align-self-start btn btn-danger btn-xs p-1"><i class="ti ti-x fs-6"></i></button>
-        @endif
+      @foreach($gruposSeleccionados as $grupoSel)
+      <div class="dropdown-item w-100 mx-0 d-flex p-2 mt-1 border flex-grow-1">
+        <div class="flex-fill d-flex align-items-center">
+          <div class="d-flex align-items-center justify-content-center rounded me-3" style="background-color: {{$grupoSel->tipoGrupo->color }}">
+            <i class="ti ti-users-group text-white" style="font-size: 4.0rem !important"></i>
+          </div>
+          <div class="flex-grow-1 me-2">
+            <p class="fs-5 text-wrap m-0">{{ $grupoSel->nombre }}</p>
+            <p class="fs-6 text-wrap fw-bold m-0">ID: {{ $grupoSel->id }} | {{ $grupoSel->tipoGrupo->nombre }}</p>
+            @foreach ($grupoSel->encargados as $encargado)
+            <p class="fs-6 text-wrap m-0 mt-1"> <span class="badge px-1" style="background-color: {{$encargado->tipoUsuario->color}}"><i class="fs-6 {{ $encargado->tipoUsuario->icono }}"></i></span> {{ $encargado->nombre(3) }}</p>
+            @endforeach
+          </div>
+        </div>
+
+        <div class="d-flex align-items-start">
+          @if($rolActivo->hasPermissionTo('grupos.opcion_desvincular_asistentes_grupos'))
+          <button type="button" wire:click="quitarSeleccion({{ $grupoSel->id }})" class="align-self-start btn btn-danger btn-xs p-1"><i class="ti ti-x fs-6"></i></button>
+          @endif
+        </div>
       </div>
-    </div>
-    @endforeach
+      @endforeach
   @else
     @if($grupoSeleccionado)
       <input type="text" id="{{$id}}" name="{{$id}}" value="{{$grupoSeleccionado->id}}" class="form-control d-none" placeholder="Enter Name">

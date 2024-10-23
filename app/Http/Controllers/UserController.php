@@ -278,7 +278,7 @@ class UserController extends Controller
       $personas = $this->filtrosBusqueda($personas, $tipo, $parametrosBusqueda);
 
       if ($personas->count() > 0) {
-        $personas = $personas->toQuery()->orderBy('id','desc')->paginate(12);
+        $personas = $personas->toQuery()->orderBy('id','desc')->paginate(3);
       } else {
         $personas = User::whereRaw('1=2')->paginate(1);
       }

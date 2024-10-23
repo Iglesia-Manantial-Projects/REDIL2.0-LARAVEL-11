@@ -209,7 +209,6 @@ class PeticionController extends Controller
     ]);
   }
 
-
   public function gestionar(Request $request, $tipo = 'sin-responder')
   {
 
@@ -387,6 +386,7 @@ class PeticionController extends Controller
     $pasosCrecimiento = PasoCrecimiento::orderBy('updated_at', 'asc')->get();
     $camposExtras = CampoExtra::where('visible', '=', true)->get();
     $meses = Helpers::meses('largo');
+
 
     return view('contenido.paginas.peticiones.gestionar', [
       'rolActivo' => $rolActivo,

@@ -1353,12 +1353,14 @@ class GrupoController extends Controller
     ]);
   }
 
-    public function graficoDelMinisterio($id_nodo="U-logueado", $maximos_niveles=2)
+
+  public function graficoDelMinisterio($id_nodo="U-logueado", $maximos_niveles=3)
 	{
 		$configuracion=Configuracion::find(1);
-		if($maximos_niveles!=20){
-		    $maximos_niveles=$configuracion->maximos_niveles_grafico_ministerio;
+		if($maximos_niveles!=0){
+		    $maximos_niveles=3;
 		}
+
 		$rolActivo = auth()->user()->roles()->wherePivot('activo', true)->first();
 
 		$identificadores = explode("-", $id_nodo);
@@ -1372,6 +1374,7 @@ class GrupoController extends Controller
 
 	  $mensaje="";
     $contador=0;
+
     $tamano_nodo_grupo=20;
     $tamano_nodo_general=20;
     $factor_vision=1;
@@ -1397,9 +1400,11 @@ class GrupoController extends Controller
     $nombre_grupo="";
     $tipo_dibujo_grupo="circle";
 
-    if($tipo_nodo=="U")
-    {
 
+
+    /// esto es para identificar de donde viene la primera consulta del grafico
+    if($tipo_nodo=="U") // este la primera vez que entra siempre sera por aca
+    {
       if($rolActivo->hasPermissionTo('grupos.grafico_ministerio_todos') || isset(auth()->user()->iglesiaEncargada()->first()->id))
       {
         $iglesia= Iglesia::find(1);
@@ -1416,13 +1421,13 @@ class GrupoController extends Controller
         array_push($array_ids_usuarios, $usuario->id);
         $mensaje="Ministerio del ".$usuario->tipoUsuario->nombre." <a href='/usuario/".$usuario->id."/perfil' target='_blank' >".$usuario->nombre(3)."</a>";
       }
-
+      //// luego aca es si dieron click dentro de un nodo del grafico a un usuario o asistente
     }else if($tipo_nodo=="A"){
       $tipoDeNodo = $tipoDeNodo."-encargado";
       array_push($array_ids_usuarios, $id);
       $usuario= User::find($id);
       $mensaje="Ministerio del ".$usuario->tipoUsuario->nombre." <a href='/usuario/".$usuario->id."/perfil' target='_blank' >".$usuario->nombre(3)."</a>";
-
+    //// luego aca es si dieron click dentro de un nodo del grafico a un grupo
     }else if($tipo_nodo=="G"){
       $tipoDeNodo = $tipoDeNodo."-grupo";
       $grupo=Grupo::find($id);
@@ -1446,267 +1451,128 @@ class GrupoController extends Controller
 
     $contador_maximos_niveles=0;
 
+
     while(count($array_ids_usuarios)>0 && $contador_maximos_niveles<$maximos_niveles)
     {
       $contador_maximos_niveles=$contador_maximos_niveles+1;
-
-      $contador=$contador+1;
-      $x_grupo=$inicio_fila;
+      /// aqui lo que hacemos es que tenemos los usuario de cada recorrido por nivel
       $usuarios=User::orderBy('users.indice_grafico_ministerial', 'asc')->whereIn('users.id', $array_ids_usuarios)->get();
+      /// aqui se resetea la variable para que siempre se llene solo con los usuarios de cada nivel mas abajo se rellena con esos usuarios
       $array_ids_usuarios= array();
 
-      if($contador==1)
-      {
-        $distancia_nodos_grupo=-1175000;
-        $distancia_nodos_usuario=235000;
-        $inicio_fila=$inicio_fila-470000;
-        $x_usuario=$inicio_fila;
-      }else if($contador==2){
-        $distancia_nodos_grupo=235000;
-        $distancia_nodos_usuario=46900;
-        $inicio_fila=$inicio_fila-93800;
-        $x_usuario=$inicio_fila;
-        $tamano_nodo_grupo=$tamano_nodo_grupo*0.5;
-      }else if($contador==3){
-        $distancia_nodos_grupo=46900;
-        $distancia_nodos_usuario=9400;
-        $inicio_fila=$inicio_fila-18900;
-        $x_usuario=$inicio_fila;
-        $tamano_nodo_grupo=$tamano_nodo_grupo*0.5;
-      }else if($contador==4){
-        $distancia_nodos_grupo=9400;
-        $distancia_nodos_usuario=1900;
-        $inicio_fila=$inicio_fila-3800;
-        $x_usuario=$inicio_fila;
-        $tamano_nodo_grupo=$tamano_nodo_grupo*0.5;
-      }else if($contador==5){
-        $distancia_nodos_grupo=1900;
-        $distancia_nodos_usuario=380; //
-        $inicio_fila=$inicio_fila-770;
-        $x_usuario=$inicio_fila;
-        $tamano_nodo_grupo=$tamano_nodo_grupo*0.5;
-      }else if($contador==6){
-        $distancia_nodos_grupo=380;
-        $distancia_nodos_usuario=75;
-        $inicio_fila=$inicio_fila-150;
-        $x_usuario=$inicio_fila;
-        $tamano_nodo_grupo=$tamano_nodo_grupo*0.5;
-      }else if($contador==7){
-        $distancia_nodos_grupo=75;
-        $distancia_nodos_usuario=15;
-        $inicio_fila=$inicio_fila-30;
-        $x_usuario=$inicio_fila;
-        $tamano_nodo_grupo=$tamano_nodo_grupo*0.5;
-      }
-
+      $idsGruposTemporal = [];
       foreach($usuarios as $usuario)
       {
-        if(IntegranteGrupo::where("user_id",$usuario->id)->count()==0 || $tipo_nodo!="modificado")
+        if(!in_array($usuario->id, $array_ids_usuarios_dibujados))
         {
-          if(!in_array($usuario->id, $array_ids_usuarios_dibujados))
-          {
-            /*$nodos.='{
-              id: "A-'.$usuario->id.'",
-              label: '.$usuario->tipoUsuario->nombre.': '.$usuario->nombre(3).',
-              type: "circle",
-              x: '.$x.',
-              y: '.$y.',
-              size: '.$tamano_nodo_general.',
-              color: "'.$usuario->tipoUsuario->color.'",
-              borderColor: "'.$usuario->tipoUsuario->color.'",
-              image: {
-                url: "'.$configuracion->url_img.'/fotos'.'/'.$usuario->foto.'",
-                scale: 1.3,
-                clip: 0.85
-              }
-            },';*/
+          $urlFoto = $configuracion->version == 1
+          ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario->foto)
+          : Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario->foto);
 
-            $urlFoto = $configuracion->version == 1
-            ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario->foto)
-            : Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario->foto);
-
-            $item = new stdClass();
-            $item->id = 'A-'.$usuario->id;
-            $item->label = $usuario->tipoUsuario->nombre.': '.$usuario->nombre(3);
-            $item->type = "circle";
-            $item->x = $x;
-            $item->y = $y;
-            $item->size = $tamano_nodo_general;
-            $item->color = $usuario->tipoUsuario->color;
-            $item->boderColor = $usuario->tipoUsuario->color;
-
-            $image = new stdClass();
-            $image->url = $urlFoto;
-            $image->scale = 1.3;
-            $image->clip = 0.85;
-
-            $item->image =$urlFoto;
-            $nodos[] = $item;
-          }else{
-              array_push($array_ids_usuarios_no_dibujados, $usuario->id);
-          }
+          /// aqui se creo los
+          $item = new stdClass();
+          $item->id = 'A-'.$usuario->id;
+          $item->image =  $urlFoto;
+          $item->title = $usuario->tipoUsuario->nombre.': '.$usuario->nombre(3);
+          $item->level = $contador;
+          $item->color = $usuario->tipoUsuario->color;
+          $item->shape = 'circularImage';
+          $item->size = 20;
+          $nodos[] = $item;
 
           array_push($array_ids_usuarios_dibujados, $usuario->id);
-          $x_grupo=$x;
-        }
 
-        $x=$x+500000;
-
-        $grupos_excluidos=array();
-        if(isset(auth()->user()->id))
-        {
-          $usuario_logueado=auth()->user();
-          $grupos_excluidos=GrupoExcluido::where("user_id",$usuario_logueado->id)->select('grupo_id')->pluck('grupo_id')->toArray();
-        }
-
-        $grupos=$usuario->gruposEncargados()->where('grupos.dado_baja', '=', 0)->whereNotIn('grupos.id', $grupos_excluidos)->orderBy('grupos.indice_grafico_ministerial', 'asc')->get();
-
-        foreach($grupos as $grupo)
-        {
-          if(!in_array($grupo->id, $array_ids_grupos_dibujados))
+          $grupos_excluidos=array();
+          if(isset(auth()->user()->id))
           {
-            if(Sede::where('grupo_id', '=', $grupo->id)->count()>0){
-              $nombre_grupo='Sede: '.Sede::where('grupo_id', '=', $grupo->id)->first()->nombre.' - '.$grupo->tipoGrupo->nombre.': '.$grupo->nombre;
-              $tipo_dibujo_grupo="equilateral";
-            }else{
-              $nombre_grupo=$grupo->tipoGrupo->nombre.': '.$grupo->nombre;
-              $tipo_dibujo_grupo="circle";
-            }
+            $usuario_logueado=auth()->user();
+            $grupos_excluidos=GrupoExcluido::where("user_id",$usuario_logueado->id)->select('grupo_id')->pluck('grupo_id')->toArray();
+          }
 
-           /* $nodos.='{
-              id: "G-'.$grupo->id.'",
-              label: "'.$nombre_grupo.'",
-              type: "'.$tipo_dibujo_grupo.'",
-              x: '.$x_grupo.',
-              y: '.$y_grupo.',
-              size: '.$tamano_nodo_grupo.',
-              color: "'.$grupo->tipoGrupo->color.'",
-              borderColor: "'.$grupo->tipoGrupo->color.'"
-            },';*/
+          $gruposUsuario=$usuario->gruposEncargados()->where('grupos.dado_baja', '=', 0)->whereNotIn('grupos.id', $grupos_excluidos)->orderBy('grupos.indice_grafico_ministerial', 'asc')->get();
+          $idsGruposTemporal = array_merge($idsGruposTemporal, $gruposUsuario->pluck('id')->toArray());
 
-            $item = new stdClass();
-            $item->id = 'G-'.$grupo->id;
-            $item->label = $nombre_grupo;
-            $item->type = $tipo_dibujo_grupo;
-            $item->x = $x_grupo;
-            $item->y = $y_grupo;
-            $item->size = $tamano_nodo_grupo;
-            $item->color = $grupo->tipoGrupo->color;
-            $item->boderColor = $grupo->tipoGrupo->color;
-            $nodos[] = $item;
-
-            array_push($array_ids_grupos_dibujados, $grupo->id);
-            $x_grupo=$x_grupo+$distancia_nodos_grupo;
-            $cantidad_usuarios_grupo=$grupo->asistentes()->count();
-            $usuarios_grupo=$grupo->asistentes()->orderBy('users.indice_grafico_ministerial', 'asc')->get();
-            $y_usuario=$y_grupo-750000;
-
-            $tamano_nodo_asistente=$tamano_nodo_grupo*0.5;
-            foreach($usuarios_grupo as $usuario_grupo)
+          // aqui recorremos los grupos que dirije el usuario o persona que estoy recorriendo y le creo la arista que conecta la persona con los grupos que dirije
+          foreach ($gruposUsuario as $grupoUsuario)
+          {
+            if(!in_array("Ar-ag-'.$usuario->id.'_'.$grupoUsuario->id.'", $array_aristas_usuario_grupo_dibujadas))
             {
-              if(!in_array($usuario_grupo->id, $array_ids_usuarios_dibujados))
-              {
-                /*$nodos.='{
-                id: "A-'.$usuario_grupo->id.'",
-                label: "'.$usuario_grupo->tipoUsuario->nombre.': '.$usuario_grupo->nombre(3).' '.$usuario_grupo->segundo_nombre.' '.$usuario_grupo->primer_apellido.' '.$usuario_grupo->segundo_apellido.'",
-                type: "circle",
-                x: '.$x_usuario.',
-                y: '.$y_usuario.',
-                url: "www.g.com",
-                size: '.$tamano_nodo_asistente.',
-                color: "'.$usuario_grupo->tipoUsuario->color.'",
-                borderColor: "'.$usuario_grupo->tipoUsuario->color.'",
-                image: {
-                  url: "'.$configuracion->url_img.'/fotos'.'/'.$usuario_grupo->foto.'",
-                  scale: 1.3,
-                  clip: 0.85
-                }
-                },';*/
+              $item = new stdClass();
+              $item->from = 'A-'.$usuario->id;
+              $item->to = 'G-'.$grupoUsuario->id;
+              $item->color= '#000';
+              $aristas[] = $item;
 
-                $urlFoto = $configuracion->version == 1
-                ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario_grupo->foto)
-                : Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/'.$usuario_grupo->foto);
-
-                $item = new stdClass();
-                $item->id = 'A-'.$usuario_grupo->id;
-                $item->label = $usuario_grupo->tipoUsuario->nombre.': '.$usuario_grupo->nombre(3);
-                $item->type = "circle";
-                $item->x = $x_usuario;
-                $item->y = $y_usuario;
-                $item->size = $tamano_nodo_asistente;
-                $item->color = $usuario_grupo->tipoUsuario->color;
-                $item->boderColor = $usuario_grupo->tipoUsuario->color;
-
-                $image = new stdClass();
-                $image->url = $urlFoto;
-                $image->scale = 1.3;
-                $image->clip = 0.85;
-
-                $item->image = $urlFoto;
-                $nodos[] = $item;
-
-                array_push($array_ids_usuarios_dibujados, $usuario_grupo->id);
-                if(!in_array("Ar-ga-'.$grupo->id.'_'.$usuario_grupo->id.'", $array_aristas_grupo_usuario_dibujadas))
-                {
-                  /*$aristas.='{
-                    id: "Ar-ga-'.$grupo->id.'_'.$usuario_grupo->id.'",
-                    source: "G-'.$grupo->id.'",
-                    target: "A-'.$usuario_grupo->id.'",
-                    color: "#999",
-                    size: 0.1
-                  },';*/
-
-                  $item = new stdClass();
-                  $item->id = 'Ar-ga-'.$grupo->id.'_'.$usuario_grupo->id;
-                  $item->source = 'G-'.$grupo->id;
-                  $item->target = 'A-'.$usuario_grupo->id;
-                  $item->color = "#999";
-                  $item->size = 0.1;
-                  $aristas[] = $item;
-
-                  array_push($array_aristas_grupo_usuario_dibujadas, "Ar-ga-'.$grupo->id.'_'.$usuario_grupo->id.'");
-                  $x_usuario=$x_usuario+$distancia_nodos_usuario;
-                }
-              }else{
-                array_push($array_ids_usuarios_no_dibujados, $usuario_grupo->id);
-              }
-
+              array_push($array_aristas_usuario_grupo_dibujadas, "Ar-ag-'.$usuario->id.'_'.$grupoUsuario->id.'");
             }
-
-
-
-            $array_ids_usuarios=array_merge($array_ids_usuarios, $grupo->asistentes()->select('users.id')->pluck('users.id')->toArray());
           }
 
-          if(!in_array("Ar-ag-'.$usuario->id.'_'.$grupo->id.'", $array_aristas_usuario_grupo_dibujadas))
+        }else{
+          array_push($array_ids_usuarios_no_dibujados, $usuario->id);
+        }
+      }
+      //// aqui obtengo los grupos que dirije pero los voy a recorrer para graficar los nodos de los grupos
+      $grupos = Grupo::whereIn('grupos.id',$idsGruposTemporal)->select('id','tipo_grupo_id','nombre')->get();
+
+      $contador = count($idsGruposTemporal)>0 ? $contador+1 : '';
+
+      foreach ($grupos as $grupo)
+      {
+        if(!in_array($grupo->id, $array_ids_grupos_dibujados))
+        {
+          if(Sede::where('grupo_id', '=', $grupo->id)->select('sede.id')->count()>0){
+            $nombre_grupo='Sede: '.Sede::where('grupo_id', '=', $grupo->id)->first()->nombre.' - '.$grupo->tipoGrupo->nombre.': '.$grupo->nombre;
+            $tipo_dibujo_grupo="box";
+          }else{
+            $nombre_grupo=$grupo->tipoGrupo->nombre.': '.$grupo->nombre;
+            $tipo_dibujo_grupo="circle";
+          }
+          // aqui adentro creo el nodo del grupo
+          $item = new stdClass();
+          $item->id = 'G-'.$grupo->id;
+          $item->color = $grupo->tipoGrupo->color;
+          $item->title = $nombre_grupo;
+          $item->level = $contador;
+          $item->shape = $tipo_dibujo_grupo;
+          $item->size = 20;
+          $nodos[] = $item;
+
+          array_push($array_ids_grupos_dibujados, $grupo->id);
+          $personasGrupo = $grupo->asistentes()->orderBy('users.indice_grafico_ministerial', 'asc')->select('users.id')->pluck('users.id')->toArray();
+          foreach ($personasGrupo as $personaGrupoId)
           {
-            /*$aristas.='{
-            id: "Ar-ag-'.$usuario->id.'_'.$grupo->id.'",
-            source: "A-'.$usuario->id.'",
-            target: "G-'.$grupo->id.'",
-            color: "#999",
-            size: 0.1
-            },';*/
+            if(!in_array("Ar-ga-'.$grupo->id.'_'.$personaGrupoId.'", $array_aristas_usuario_grupo_dibujadas))
+            {
+              if(!in_array($personaGrupoId, $array_ids_usuarios))
+              {
+                ///esta es la arista que conecta el grupo con las personas que asisten a ese grupo
+                $item = new stdClass();
+                $item->from = 'G-'.$grupo->id;
+                $item->to = 'A-'.$personaGrupoId;
+                $item->color= '{ color: "red" }';
+                $aristas[] = $item;
 
-            $item = new stdClass();
-            $item->id = 'Ar-ag-'.$usuario->id.'_'.$grupo->id;
-            $item->source = 'A-'.$usuario->id;
-            $item->target = 'G-'.$grupo->id;
-            $item->color = "#999";
-            $item->size = 0.1;
-            $aristas[] = $item;
-
-            array_push($array_aristas_usuario_grupo_dibujadas, "Ar-ag-'.$usuario->id.'_'.$grupo->id.'");
+                array_push($array_aristas_usuario_grupo_dibujadas, "Ar-ga-'.$grupo->id.'_'.$personaGrupoId.'");
+              }else{
+                array_push($array_ids_usuarios_no_dibujados, $personaGrupoId);
+              }
+            }
           }
+          ////aqui es donde guardo los usuarios que necesito para el siguiente recorrido del proximo nivel y asi se repite el ciclo
+
+          $array_ids_usuarios=array_merge($array_ids_usuarios, $personasGrupo);
+
         }
       }
 
+      $contador++;
       $tipo_nodo="modificado";
-      $y_grupo=$y_grupo-1500000;
     }
 
+    // return $nodos;
+
     $usuarios_no_dibujados=User::whereIn("id",$array_ids_usuarios_no_dibujados)->get();
-    //return $nodos;
+
     return view('contenido.paginas.grupos.grafico-del-ministerio', [
       'nodos'=> $nodos,
       'aristas'=> $aristas,
@@ -1721,6 +1587,7 @@ class GrupoController extends Controller
       'rolActivo' => $rolActivo
     ]);
 	}
+
 
   public function cambiarIndice (Request $request, $tipo, $id)
   {

@@ -79,7 +79,10 @@ export default defineConfig({
   ],resolve: {
     alias: {
         // Asegúrate de que sigma esté disponible
-        'sigma': 'node_modules/sigma/build/sigma.min.js',
+         'sigma': '/node_modules/sigma/dist/sigma.min.js',
+            'graphology': '/node_modules/graphology/dist/graphology.umd.js'
     },
-},
+},define: {
+    'process.env': {}
+  },
 });

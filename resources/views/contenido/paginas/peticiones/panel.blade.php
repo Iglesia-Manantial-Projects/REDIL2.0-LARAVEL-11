@@ -36,6 +36,7 @@ $configData = Helper::appClasses();
   <script type="module">
     $(function() {
       //esta bandera impide que entre en un bucle cuando se ejecuta la funcion cb(start, end)
+      let band=0;
       moment.locale('es');
 
       function cb(start, end) {
@@ -44,6 +45,9 @@ $configData = Helper::appClasses();
         $('#filtroFechaFin').val(end.format('YYYY-MM-DD'));
 
         $('#filtroFechas span').html(start.format('YYYY-MM-DD') + ' hasta ' + end.format('YYYY-MM-DD'));
+        if(band==1)
+        $("#filtro").submit();
+        band=1;
       }
 
       //comprobamos si existe la fecha incio y fecha fin y creamos las fechas con el formato aceptado
@@ -508,7 +512,7 @@ $configData = Helper::appClasses();
                   <td class="text-center">{{ $tipoPenticion->nombre }}</td>
                   <td class="text-center">{{ $tipoPenticion->cantidad }}</td>
                   <td class="text-center">
-                    <button  onclick="filtroTipoPeticion('{{$tipoPenticion->id}}')" class="btn btn-xs btn-outline-primary waves-effect btn-xs p-1" data-bs-toggle="tooltip" aria-label="Filtrar peticiones de tipo {{ $tipoPenticion->nombre }}" data-bs-original-title="Filtrar peticiones de {{$pais->nombre}} y tipo {{ $tipo->nombre }}">
+                    <button  onclick="filtroTipoPeticion('{{$tipoPenticion->id}}')" class="btn btn-xs btn-outline-primary waves-effect btn-xs p-1" data-bs-toggle="tooltip" aria-label="Filtrar peticiones de tipo {{ $tipoPenticion->nombre }}" data-bs-original-title="Filtrar peticiones por tipo {{ $tipoPenticion->nombre }}">
                       <i class="ti ti-filter ti-xs"></i>
                     </button>
                   </td>

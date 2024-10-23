@@ -7,7 +7,29 @@ $configData = Helper::appClasses();
 @section('title', 'Gráfico del ministerio')
 
 <!-- Page -->
+
+
+
 @section('vendor-style')
+
+<style>
+      #graph-container{
+      width: 100%;
+      height:500px;
+      border: 1px solid lightgray;
+    }
+
+    .vis-tooltip {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        font-size: 14px;
+        border-radius: 4px;
+        z-index: 1000;
+    }
+</style>
+
 @vite([
 'resources/assets/vendor/libs/select2/select2.scss',
 'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
@@ -15,95 +37,149 @@ $configData = Helper::appClasses();
 @endsection
 
 @section('vendor-script')
-<!-- Dependencias necesarias en el orden correcto -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.4/graphology.umd.min.js"></script>
-<!-- Asegúrate de usar la versión más reciente y estable de Sigma -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script>
-<!-- Programa de nodos de imagen -->
-<script src="
-https://cdn.jsdelivr.net/npm/@sigma/node-image@3.0.0-beta.15/dist/sigma-node-image.cjs.min.js
-"></script>
+
 
 @vite([
 'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
 'resources/assets/vendor/libs/select2/select2.js',
+'resources/assets/vendor/libs/sigma/sigma.js',
 
 ])
 @endsection
 
 @section('page-script')
 
+<script>
+      // Parsear los datos JSON
+      const nodos = JSON.parse(<?php print json_encode(json_encode($nodos)); ?>);
+      const aristas = JSON.parse(<?php print json_encode(json_encode($aristas)); ?>);
 
-<script type="module">
- document.addEventListener('DOMContentLoaded', function() {
-          // Arreglo de nodos
-          const nodes = JSON.parse(<?php print json_encode(json_encode($nodos)); ?>);
-          const edges = JSON.parse(<?php print json_encode(json_encode($aristas)); ?>);
+      var nodes = null;
+      var edges = null;
+      var network = null;
+      var directionInput = document.getElementById("direction");
 
-          // Crear el grafo
-          const graph = new graphology.Graph();
+      function destroy()
+      {
+        if (network !== null) {
+          network.destroy();
+          network = null;
+        }
+      }
 
-          // Agregar nodos al grafo
-          nodes.forEach(node => {
+      function draw()
+      {
+        destroy();
+        nodes = JSON.parse(<?php print json_encode(json_encode($nodos)); ?>);
+        edges = JSON.parse(<?php print json_encode(json_encode($aristas)); ?>);
+        var connectionCount = [];
 
-              graph.addNode(node.id, {
-                  label: node.label,
-                  x: node.x,
-                  y: node.y,
-                  size: node.size,
-                  color: node.color,
-                  image:node.image,
-                  minNodeSize: 10,
-                  type: "image",
-                  maxNodeSize: 20,
-                  showLabel: false  // Inicialmente ocultamos todas las etiquetas
-              });
-          });
 
-          // Agregar aristas al grafo
-          edges.forEach(edge => {
-              graph.addEdge(edge.source, edge.target, {
-                  size: edge.size,
-                  color: edge.color
-              });
-          });
+        // create a network
+        var container = document.getElementById("graph-container");
+        var data =
+        {
+          nodes: nodes,
+          edges: edges,
+        };
 
-        // Configuración básica de Sigma
-        const renderer = new Sigma(graph, document.getElementById("graph-container"), {
-            minCameraRatio: 0.1,
-            maxCameraRatio: 10,
-            defaultNodeColor: "#999",
-            defaultEdgeColor: "#999",
-            labelSize: 14,
-            labelWeight: "bold",
-            defaultEdgeType: "arrow",
-            labelRenderedSizeThreshold: 1,
-            renderLabels: false,  // Desactivamos el renderizado global de etiquetas
-            labelDensity: 0.7,
-            labelGridCellSize: 60,
-            nodeProgramClasses: {
-                   image: NodeImageProgram,
+        var options =
+        {
+              interaction: { hover: true ,tooltipDelay: 0 },// Muestra el tooltip inmediatamente
+              manipulation: {
+              enabled: true,
+            },
+              edges: {
+                smooth: {
+                  type: "cubicBezier",
+                  forceDirection:
+                    directionInput.value == "UD" || directionInput.value == "DU"
+                      ? "vertical"
+                      : "horizontal",
+                  roundness: 0.4,
                 },
+              },
+              layout: {
+                hierarchical: {
+                  direction: directionInput.value,
+                },
+              },
+              nodes: {
+                  size:50,
+                  title: undefined, // Esto asegura que se use el título definido en cada nodo
+                  tooltipDelay: 0,
+                  widthConstraint:false,
+                // Muestra el tooltip inmediatamente
+              },
+              physics: false,
+        };
+        network = new vis.Network(container, data, options);
 
-            // Función personalizada para decidir si se muestra la etiqueta
-            labelRenderer: {
-                shouldRender: (node) => node.showLabel === true
+        // add event listeners
+        network.on("select", function (params)
+        {
+          document.getElementById("selection").innerText =
+            "Selection: " + params.nodes;
+        });
+
+        //funcion click
+        network.on("click", function (params)
+        {
+            var nodeId = this.getNodeAt(params.pointer.DOM);
+            if(nodeId != null)
+            {
+              window.top.location.href = '/grupo/grafico-del-ministerio/'+nodeId;
             }
+
+            // window.top.location.href = '/grupo/grafico-del-ministerio/'+nodeId;
         });
 
-        // Manejar eventos de hover
-        renderer.on("enterNode", ({ node }) => {
-            // Mostrar la etiqueta del nodo cuando el mouse está encima
-            graph.setNodeAttribute(node, "showLabel", true);
-            renderer.refresh();
+        network.on("showPopup", function (params)
+        {
+          document.getElementById("eventSpanHeading").innerText = "showPopup event: ";
+          document.getElementById("eventSpanContent").innerText = JSON.stringify(
+            params,
+            null,
+            4
+          );
         });
 
-        renderer.on("leaveNode", ({ node }) => {
-            // Ocultar la etiqueta cuando el mouse sale del nodo
-            graph.setNodeAttribute(node, "showLabel", false);
-            renderer.refresh();
+        network.on("hidePopup", function ()
+        {
+          console.log("hidePopup Event");
         });
-    });
+        network.on("blurNode", function (params)
+        {
+        console.log("blurNode Event:", params);
+        });
+      }
+
+      var directionInput = document.getElementById("direction");
+      var btnUD = document.getElementById("btn-UD");
+      btnUD.onclick = function () {
+        directionInput.value = "UD";
+        draw();
+      };
+      var btnDU = document.getElementById("btn-DU");
+      btnDU.onclick = function () {
+        directionInput.value = "DU";
+        draw();
+      };
+      var btnLR = document.getElementById("btn-LR");
+      btnLR.onclick = function () {
+        directionInput.value = "LR";
+        draw();
+      };
+      var btnRL = document.getElementById("btn-RL");
+      btnRL.onclick = function () {
+        directionInput.value = "RL";
+        draw();
+      };
+
+      window.addEventListener("load", () => {
+        draw();
+      });
+
 </script>
 
 
@@ -126,6 +202,8 @@ https://cdn.jsdelivr.net/npm/@sigma/node-image@3.0.0-beta.15/dist/sigma-node-ima
 
   <h4 class="mb-1">GRÁFICO DE TU MINISTERIO</h4>
   <p class="mb-4">Este gráfico te permitirá visualizar un árbol con la estructura jerárquica de tu ministerio</p>
+
+
 
 
   @include('layouts.status-msn')
@@ -159,6 +237,14 @@ https://cdn.jsdelivr.net/npm/@sigma/node-image@3.0.0-beta.15/dist/sigma-node-ima
               <button type="button" class="my-1 btn btn-xs btn-outline-primary waves-effect" data-bs-toggle="modal" data-bs-target="#modalPersonasNoGraficadas">
                 <span class="ti-xs ti ti-pencil-off me-2"></span>Personas no gráficadas
               </button>
+
+
+                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-UD" value="Up-Down">DE ARRIBA HACIA ABAJO</button>
+                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-DU" value="Down-Up">DE ABAJO HACIA ARRIBA</button>
+                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-LR" value="Left-Right"> DE IZQUIERDA A DERECHA </button>
+                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-RL" value="Right-Left">DE DERECHA A IZQUIERDA </button>
+                <button style="display:none !important" class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"  id="direction" value="UD"> </button>
+                <p  id="selection" class="hidden" ></p>
           </div>
 
           @if($tipoDeNodo != 'U-principal')

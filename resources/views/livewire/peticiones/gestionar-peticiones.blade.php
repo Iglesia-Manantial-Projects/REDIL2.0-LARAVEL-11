@@ -1,7 +1,7 @@
 <div>
   <!-- Modal respuesta -->
   <div wire:ignore.self class="modal fade" id="modalRespuesta" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+    <div class="modal-dialog modal-lg modal-simple ">
       <div class="modal-content p-3 p-md-5">
         <div class="modal-body">
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -10,14 +10,9 @@
           </div>
           <form wire:submit="addRespuesta" class="row g-3">
 
-           <!-- Create the editor container -->
-            <div wire:ignore>
-              <div id="editor"></div>
-            </div>
-
             <!-- Observacion -->
-            <div wire:ignore class="mb-2 col-12 col-md-12">
-              <textarea id="editorRespuesta" name="respuesta" class="form-control" rows="2" maxlength="500" spellcheck="false" data-ms-editor="true" placeholder="Detalla aquí la respuesta del la persona."></textarea>
+            <div wire:ignore>
+              <div id="editorRespuesta"></div>
             </div>
             <!--/Observacion-->
 
@@ -25,6 +20,7 @@
               <button type="submit" class="btn btn-primary me-sm-3 me-1">Guardar</button>
               <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
             </div>
+
           </form>
         </div>
       </div>
@@ -34,7 +30,7 @@
 
   <!-- Modal Seguimiento -->
   <div wire:ignore.self class="modal fade" id="modalSeguimiento" tabindex="-2" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-simple modal-edit-user">
+    <div class="modal-dialog modal-xl modal-simple ">
       <div class="modal-content p-3 p-md-5">
         <div class="modal-body">
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -44,13 +40,13 @@
           <form wire:submit="addSeguimiento" class="row g-3">
 
             <!-- Observacion -->
-            <div wire:ignore class="mb-2 col-12 col-md-12">
-              <textarea id="editorSeguimiento"wire:model="descripcionSeguimiento"  name="descripcionSeguimiento" class="form-control" rows="2" maxlength="500" spellcheck="false" data-ms-editor="true" placeholder="Detalla aquí la respuesta del la persona.">{!! $descripcionSeguimiento !!}</textarea>
+            <div wire:ignore>
+              <div id="editorSeguimiento"></div>
             </div>
             <!--/Observacion-->
 
-            <div id="versiculosRecomendados" class="mt-0">
-              <button type="button" class="btn btn-success rounded-pill waves-effect waves-light mt-1 btn-sm openBible"> <i class="ti ti-book"> </i> Buscar en la  Biblia </button>
+            <div id="buscarBiblia" class="mt-0">
+              <button type="button" class="btn btn-success rounded-pill waves-effect waves-light mt-1 btn-sm openBible"> <i class="ti ti-book"> </i> Buscar en la  Biblia</button>
             </div>
 
             <div id="versiculosRecomendados" class="demo-inline-spacing mt-1">
@@ -70,7 +66,7 @@
 
   <!-- Modal buscarBiblia -->
   <div wire:ignore.self id="modalBuscarBiblia"  class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-simple modal-edit-user  modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-simple   modal-dialog-centered">
       <div class="modal-content p-3 p-md-5">
         <div class="modal-body">
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -131,55 +127,80 @@
   </div>
   <!--/ Modal buscarBiblia  -->
 
-   <!-- Include stylesheet -->
-   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-
-
-
- <!-- Include the Quill library -->
- <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-
- <!-- Initialize Quill editor -->
- <script>
-
- </script>
 </div>
 
 @assets
-<!-- este meta es obligatorio para el tinymce que es el editor de texto -->
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<script src="https://cdn.tiny.cloud/1/u0v8um3sg88k8eizaz5729j679xnspqr43nyokktksguekzn/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+@vite([
+  'resources/assets/vendor/libs/quill/typography.scss',
+  'resources/assets/vendor/libs/quill/editor.scss'
+])
 
+@vite([
+  'resources/assets/vendor/libs/quill/quill.js'
+]);
 @endassets
 
 @script
 <script >
-   const quill = new Quill('#editor', {
-         theme: 'snow'
-     });
-  tinymce.init({
-    selector: 'textarea#editorSeguimiento', // Replace this CSS selector to match the placeholder element for TinyMCE
-    plugins: 'anchor autolink charmap emoticons link lists searchreplace table visualblocks wordcount  ',
-    toolbar: 'undo redo | blocks fontsize | bold italic underline strikethrough emoticons | link table  | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight |',
-    tinycomments_mode: 'embedded',
-    tinycomments_author: 'Editor de respuestas',
-    language: 'es',
-    relative_urls: false,
-    remove_script_host: false,
-    setup: function (editor) {
 
-      editor.on('change', function (e) {
-         $wire.set('descripcionSeguimiento', editor.getContent());
-      });
-  }
+  /* editor Respuesta */
+  editorRespuesta = new Quill('#editorRespuesta', {
+    bounds: '#editorRespuesta',
+    placeholder: 'Escribe aquí la respuesta de la persona',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'header': 1 }, { 'header': 2 }],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'font': [] }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        ['clean']
+      ]
+    },
+    theme: 'snow'
   });
 
-  $wire.on('abrirModal', () => {
-    $('#' + event.detail.nombreModal).modal('show');
+  editorRespuesta.on('text-change', (delta, oldDelta, source) => {
+    $wire.set('respuesta', editorRespuesta.root.innerHTML);
+  });
+  /* fin editor respuesta */
+
+  /* editor seguimiento */
+  editorSeguimiento = new Quill('#editorSeguimiento', {
+    bounds: '#editorSeguimiento',
+    placeholder: 'Escribe aquí el seguimiento de la persona',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'header': 1 }, { 'header': 2 }],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'font': [] }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        ['clean']
+      ]
+    },
+    theme: 'snow'
   });
 
   $wire.on('textoInicialSeguimiento', () => {
-    tinymce.get('editorSeguimiento').setContent(event.detail.textoInicial);
+    editorSeguimiento.root.innerHTML = event.detail.textoInicial;
+  });
+
+  editorSeguimiento.on('text-change', (delta, oldDelta, source) => {
+    $wire.set('descripcionSeguimiento', editorSeguimiento.root.innerHTML);
+  });
+  /* fin editor seguimiento */
+
+  $wire.on('abrirModal', () => {
+    $('#' + event.detail.nombreModal).modal('show');
   });
 
   $wire.on('cerrarModal', () => {
@@ -193,8 +214,8 @@
   $(document).on('click', '.add-versiculo', function (e) {
     let verso = $(this).attr("data-verso");
     let cita =  $(this).attr("data-cita");
-    let texto = tinymce.get('editorSeguimiento').getContent(event.detail.textoInicial);
-    tinymce.get('editorSeguimiento').setContent(texto+'<p><i>"'+verso+'"</i> <b>('+cita+', RVR60)</b></p>');
+    editorSeguimiento.root.innerHTML = editorSeguimiento.root.innerHTML+'<p><i>"'+verso+'"</i> <b>('+cita+', RVR60)</b></p>';
+    $wire.set('descripcionSeguimiento', editorSeguimiento.root.innerHTML);
 
     $('#modalBuscarBiblia').modal('hide');
   });
