@@ -3,9 +3,6 @@
 @section('title', 'Tema - Nuevo')
 
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
   @vite([
     'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
     'resources/assets/vendor/libs/select2/select2.scss',
@@ -42,7 +39,10 @@
         [{ 'indent': '-1'}, { 'indent': '+1' }],
         ['link', 'image', 'video'],
         ['clean']
-      ]
+      ],
+      imageResize: {
+          modules: [ 'Resize', 'DisplaySize']
+        },
     },
     theme: 'snow'
   });

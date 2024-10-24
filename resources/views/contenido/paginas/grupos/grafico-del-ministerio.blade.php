@@ -238,13 +238,13 @@ $configData = Helper::appClasses();
                 <span class="ti-xs ti ti-pencil-off me-2"></span>Personas no gráficadas
               </button>
 
-
-                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-UD" value="Up-Down">DE ARRIBA HACIA ABAJO</button>
-                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-DU" value="Down-Up">DE ABAJO HACIA ARRIBA</button>
-                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-LR" value="Left-Right"> DE IZQUIERDA A DERECHA </button>
-                <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-RL" value="Right-Left">DE DERECHA A IZQUIERDA </button>
-                <button style="display:none !important" class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"  id="direction" value="UD"> </button>
-                <p  id="selection" class="hidden" ></p>
+              <!--/ estos botones son para cambiar la direccion del grafico por defecto siempre arrancara UP TO DOWN -->
+              <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-UD" value="Up-Down">DE ARRIBA HACIA ABAJO</button>
+              <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-DU" value="Down-Up">DE ABAJO HACIA ARRIBA</button>
+              <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-LR" value="Left-Right"> DE IZQUIERDA A DERECHA </button>
+              <button class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"   id="btn-RL" value="Right-Left">DE DERECHA A IZQUIERDA </button>
+              <button style="display:none !important" class="my-1 btn btn-xs btn-outline-primary waves-effect" type="button"  id="direction" value="UD"> </button>
+              <p  id="selection" class="hidden" ></p>
           </div>
 
           @if($tipoDeNodo != 'U-principal')

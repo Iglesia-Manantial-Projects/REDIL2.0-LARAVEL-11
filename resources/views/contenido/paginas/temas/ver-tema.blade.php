@@ -3,18 +3,31 @@
 @section('title', 'Tema - Nuevo')
 
 @section('vendor-style')
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.css')}}" />
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
+  @vite([
+    'resources/assets/vendor/libs/quill/typography.scss',
+    'resources/assets/vendor/libs/quill/editor.scss'
+  ])
 @endsection
 
 @section('vendor-script')
-<script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
-<script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+  @vite([
+    'resources/assets/vendor/libs/quill/quill.js'
+  ])
 @endsection
 
 @section('page-script')
+<script type="module">
+  const editor = new Quill('#editor', {
+    bounds: '#editor',
+    placeholder: 'Escribe aquí la respuesta de la persona',
+    modules: {
+    },
+    theme: 'bubble'
+  });
+
+  editor.root.innerHTML = '{!! $tema->contenido !!}';
+  editor.editor.enable(false);
+</script>
 @endsection
 
 @section('content')
@@ -65,11 +78,12 @@
       </div>
 
 
-      <div class="col-12">
-        {!! $tema->contenido !!}
+      <div id="editor">
       </div>
 
     </div>
   </div>
+
+
 
 @endsection

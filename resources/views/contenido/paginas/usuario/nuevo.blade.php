@@ -2,6 +2,7 @@
 $configData = Helper::appClasses();
 @endphp
 
+
 @extends($layout)
 
 @section('title', 'Nuevo usuario')
@@ -14,7 +15,7 @@ $configData = Helper::appClasses();
 'resources/assets/vendor/libs/flatpickr/flatpickr.scss',
 'resources/assets/vendor/libs/sweetalert2/sweetalert2.scss',
 'resources/assets/vendor/libs/select2/select2.scss',
-'resources/assets/vendor/libs/cropperjs/cropper.css',
+
 ])
 @endsection
 
@@ -23,94 +24,197 @@ $configData = Helper::appClasses();
 'resources/assets/vendor/libs/flatpickr/flatpickr.js',
 'resources/assets/vendor/libs/sweetalert2/sweetalert2.js',
 'resources/assets/vendor/libs/select2/select2.js',
-'resources/assets/vendor/libs/cropperjs/cropper.js',
+
 ])
 @endsection
 
 @section('page-script')
-@vite([
-'resources/assets/js/form-basic-inputs.js',
-
-])
-<script type="module">
-  $('.selectorGenero').on('change', function(event){
-    if($("#imagen-recortada").val()=="")
-    {
-      if($(this).val()==1)
-        $("#preview-foto").attr("src", "{{$configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/default-f.png') : $configuracion->ruta_almacenamiento.'/img/foto-usuario/default-f.png' }}");
-      else
-        $("#preview-foto").attr("src", "{{$configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/default-m.png') : $configuracion->ruta_almacenamiento.'/img/foto-usuario/default-m.png' }}");
-    }
-  });
-  </script>
-
 
 <script type="module">
 
-    $(function () {
-      'use strict';
+  $(function () {
+    'use strict';
 
-      var croppingImage = document.querySelector('#croppingImage'),
-        //img_w = document.querySelector('.img-w'),
-        cropBtn = document.querySelector('.crop'),
-        croppedImg = document.querySelector('.cropped-img'),
-        dwn = document.querySelector('.download'),
-        upload = document.querySelector('#cropperImageUpload'),
-        modalImg = document.querySelector('.modal-img'),
-        inputResultado = document.querySelector('#imagen-recortada'),
-        cropper = '';
+    var croppingImage = document.querySelector('#croppingImage'),
+      //img_w = document.querySelector('.img-w'),
+      cropBtn = document.querySelector('.crop'),
+      croppedImg = document.querySelector('.cropped-img'),
+      dwn = document.querySelector('.download'),
+      upload = document.querySelector('#cropperImageUpload'),
+      modalImg = document.querySelector('.modal-img'),
+      inputResultado = document.querySelector('#imagen-recortada'),
+      cropper = '';
 
-      setTimeout(() => {
-        cropper = new Cropper( croppingImage, {
-          zoomable: false,
-          aspectRatio: 1,
-          cropBoxResizable: true
-        });
-      }, 1000);
+    setTimeout(() => {
+      cropper = new Cropper( croppingImage, {
+        zoomable: false,
+        aspectRatio: 1,
+        cropBoxResizable: true
+      });
+    }, 1000);
 
-      // on change show image with crop options
-      upload.addEventListener('change', function (e) {
-        if (e.target.files.length) {
-          console.log(e.target.files[0]);
-          var fileType = e.target.files[0].type;
-          if (fileType === 'image/gif' || fileType === 'image/jpeg' || fileType === 'image/png') {
-            cropper.destroy();
-            // start file reader
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              if (e.target.result) {
-                croppingImage.src = e.target.result;
-                cropper = new Cropper(croppingImage, {
-                  zoomable: false,
-                  aspectRatio: 1,
-                  cropBoxResizable: true
-                });
-              }
-            };
-            reader.readAsDataURL(e.target.files[0]);
-          } else {
-            alert('Selected file type is not supported. Please try again');
-          }
+    // on change show image with crop options
+    upload.addEventListener('change', function (e) {
+      if (e.target.files.length) {
+        console.log(e.target.files[0]);
+        var fileType = e.target.files[0].type;
+        if (fileType === 'image/gif' || fileType === 'image/jpeg' || fileType === 'image/png') {
+          cropper.destroy();
+          // start file reader
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            if (e.target.result) {
+              croppingImage.src = e.target.result;
+              cropper = new Cropper(croppingImage, {
+                zoomable: false,
+                aspectRatio: 1,
+                cropBoxResizable: true
+              });
+            }
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        } else {
+          alert('Selected file type is not supported. Please try again');
         }
-      });
-
-      // crop on click
-      cropBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        // get result to data uri
-        let imgSrc = cropper
-          .getCroppedCanvas({
-            width: 300 // input value
-          })
-          .toDataURL();
-        croppedImg.src = imgSrc;
-        inputResultado.value = imgSrc;
-        //dwn.setAttribute('href', imgSrc);
-        //dwn.download = 'imagename.png';
-      });
+      }
     });
 
+    // crop on click
+    cropBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      // get result to data uri
+      let imgSrc = cropper
+        .getCroppedCanvas({
+          width: 300 // input value
+        })
+        .toDataURL();
+      croppedImg.src = imgSrc;
+      inputResultado.value = imgSrc;
+      //dwn.setAttribute('href', imgSrc);
+      //dwn.download = 'imagename.png';
+    });
+  });
+
 </script>
+
+<script type="module">
+
+  $(".fecha-picker").flatpickr({
+      dateFormat: "Y-m-d"
+  });
+
+  $(document).ready(function() {
+    $('.select2').select2({
+      width: '100px',
+      allowClear: true,
+      placeholder: 'Ninguno'
+    });
+  });
+</script>
+
+<script type="module">
+  window.addEventListener('msn', event => {
+    Swal.fire({
+      title: event.detail.msnTitulo,
+      html: event.detail.msnTexto,
+      icon: event.detail.msnIcono,
+      customClass: {
+        confirmButton: 'btn btn-primary'
+      },
+      buttonsStyling: false
+    });
+  });
+</script>
+
+<script type="module">
+  window.addEventListener('bloquedoBtnGuardar', event => {
+    $(".btnGuardar").attr('disabled','disabled');
+  });
+
+  window.addEventListener('desbloquedoBtnGuardar', event => {
+    $(".btnGuardar").removeAttr('disabled');
+  });
+</script>
+
+<script type="module">
+$('.selectorGenero').on('change', function(event){
+  if($("#imagen-recortada").val()=="")
+  {
+    if($(this).val()==1)
+      $("#preview-foto").attr("src", "{{$configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/default-f.png') : $configuracion->ruta_almacenamiento.'/img/foto-usuario/default-f.png' }}");
+    else
+      $("#preview-foto").attr("src", "{{$configuracion->version == 1 ? Storage::url($configuracion->ruta_almacenamiento.'/img/foto-usuario/default-m.png') : $configuracion->ruta_almacenamiento.'/img/foto-usuario/default-m.png' }}");
+  }
+});
+</script>
+
+<script type="module">
+  $('#tienesUnaPeticion').change(function() {
+
+    if (this.checked) {
+      $("#divSelectTipoPeticion").removeClass("d-none");
+      $("#divDescripcionPeticion").removeClass("d-none");
+      $('#descripcion_peticion').prop("required", true);
+      $('#tipo_peticion').prop("required", true);
+    } else {
+      $("#divSelectTipoPeticion").addClass("d-none");
+      $("#divDescripcionPeticion").addClass("d-none");
+
+      $("#descripcion_peticion").val("");
+      $('#descripcion_peticion').removeAttr("required");
+
+      $("#tipo_peticion").val("");
+      $('#tipo_peticion').removeAttr("required");
+    }
+});
+</script>
+
+<script type="text/javascript">
+  $('#identificacion').keyup(function () {
+    clearTimeout($.data(this, 'timer'));
+    if($("#identificacion").val()!='')
+    {
+      @if($configuracion->correo_por_defecto==TRUE && $formulario->visible_email==TRUE)
+      if ($("#email").val() == '')
+      {
+        $("#email").val($("#identificacion").val()+"@cambiaestecorreo.com");
+      }else if($("#email").val().indexOf('cambiaestecorreo.com') != -1)
+      {
+        $("#email").val($("#identificacion").val()+"@cambiaestecorreo.com");
+      }
+      @endif
+    }
+
+
+  });
+</script>
+
+<script type="text/javascript">
+  function sinComillas(e) {
+    tecla = (document.all) ? e.keyCode : e.which;
+    patron =/[\x5C'"]/;
+    te = String.fromCharCode(tecla);
+    return !patron.test(te);
+  }
+</script>
+
+<script type="text/javascript">
+  $('#formulario').submit(function(){
+    $('.btnGuardar').attr('disabled','disabled');
+
+    Swal.fire({
+      title: "Espera un momento",
+      text: "Ya estamos guardando...",
+      icon: "info",
+      showCancelButton: false,
+      showConfirmButton: false,
+      showDenyButton: false
+    });
+  });
+</script>
+@endsection
+
+
 
 @section('content')
 <div class="row {{$formulario->es_formulario_exterior ? 'p-4 m-0' : '' }} ">

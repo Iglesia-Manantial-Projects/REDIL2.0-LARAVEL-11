@@ -76,13 +76,11 @@ export default defineConfig({
     }),
     html(),
     libsWindowAssignment()
-  ],resolve: {
-    alias: {
-        // Asegúrate de que sigma esté disponible
-         'sigma': '/node_modules/sigma/dist/sigma.min.js',
-            'graphology': '/node_modules/graphology/dist/graphology.umd.js'
-    },
-},define: {
-    'process.env': {}
+  ],
+  resolve: {
+    alias: {}
   },
+  define: {
+    'process.env': {}
+  }
 });
